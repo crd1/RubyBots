@@ -21,7 +21,7 @@ public class Battle {
 		for (int i = 0; i < numberOfBots; i++) {
 			Context context = new Context(i, round);
 			MoveResult result = Engine.callBot(context);
-			System.out.println("Move result for bot " + i + " is " + result);
+			System.out.println("Obtained move result: " + result);
 		}
 		System.out.println("--------------------------------------\nEnd of round " + round);
 	}
