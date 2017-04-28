@@ -30,7 +30,7 @@ public class Engine {
 		System.out.println("Done preparing engine.");
 	}
 
-	public static void loadBots(String... botfiles) {
+	public static void loadBotsFromClasspath(String... botfiles) {
 		System.out.println("Loading bots.");
 		int i = getNumberOfBots();
 		for (String botfile : botfiles) {

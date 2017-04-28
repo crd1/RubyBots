@@ -7,17 +7,17 @@ import de.crd.rubybots.battle.Battle;
 public class App {
 	public static void main(String[] args) {
 		System.out.println("RubyBots");
-		if (!init()) {
+		if (!init("bot.rb", "bot.rb")) {
 			System.exit(-1);
 		}
 		Battle battle = new Battle(3);
 		battle.execute();
 	}
 
-	private static boolean init() {
+	private static boolean init(String... bots) {
 		try {
 			Engine.prepareEngine();
-			Engine.loadBots("bot.rb", "bot.rb");
+			Engine.loadBotsFromClasspath(bots);
 		} catch (ScriptException e) {
 			System.out.println("RubyBots could not be initialized.");
 			return false;
