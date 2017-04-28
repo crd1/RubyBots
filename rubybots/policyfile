@@ -1,0 +1,7 @@
+/* AUTOMATICALLY GENERATED ON Fri Apr 28 22:59:58 CEST 2017*/
+/* DO NOT EDIT */
+
+grant codeBase "file://C:/projecte/RubyBots/rubybots" {
+  permission java.util.PropertyPermission "jruby", "read";
+};
+

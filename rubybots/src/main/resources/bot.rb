@@ -1,3 +1,3 @@
-puts "I'm bot #{$botNumber}"
+puts "I'm bot #{$context.botNumber}"
 puts "I'm gonna destroy you"
-$result.botNumber = $botNumber
+$result.botNumber = $context.botNumber
