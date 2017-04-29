@@ -11,7 +11,7 @@ import de.crd.rubybots.battle.Action.ActionType;
 
 public class Battlefield {
 
-	private static final int SPACE_PER_BOT = 5;
+	private static final int SPACE_PER_BOT = 10;
 	private static final Integer MINE_REPRESENTATION = -1;
 	private final Battle parentBattle;
 	private int currentRound;
@@ -177,7 +177,13 @@ public class Battlefield {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < fieldSize; i++) {
 			Integer botOnField = field.get(i);
-			sb.append(botOnField != null ? botOnField : "*");
+			if (botOnField == null) {
+				sb.append("-");
+			} else if (botOnField == MINE_REPRESENTATION) {
+				sb.append("#");
+			} else {
+				sb.append(botOnField);
+			}
 		}
 		return sb.toString();
 	}
@@ -247,10 +253,12 @@ public class Battlefield {
 	}
 
 	public Integer getWinner() {
-		List<Integer> menStanding = field.values().stream().filter(bot -> bot != null).collect(Collectors.toList());
+		List<Integer> menStanding = field.values().stream().filter(bot -> (bot != null && bot != MINE_REPRESENTATION))
+				.collect(Collectors.toList());
 		Collections.sort(menStanding);
 		if (menStanding.size() != 1) {
-			System.out.println("No winner. Men standing are: " + menStanding);
+			// System.out.println("No winner. Men standing are: " +
+			// menStanding);
 			return null;
 		}
 		return menStanding.get(0); // last man standing...

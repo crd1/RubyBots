@@ -1,5 +1,6 @@
 package de.crd.rubybots;
 
+import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +28,17 @@ public class App {
 	public static void main(String[] args) {
 		System.out.println("*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
 		setExceptionHandler();
-		List<BotConfig> botConfig = getBots(args);
-		Battle battle = getBattle(botConfig.size());
+		List<BotConfig> botConfig = getBotsFromArgs(args);
+		Battle battle = getDefaultBattle(botConfig.size());
 		if (!startBattle(battle, botConfig)) {
 			System.exit(-1);
 		}
 		System.exit(0);
 	}
 
+	/**
+	 * API ENTRY POINT
+	 */
 	public static boolean startBattle(Battle battle, List<BotConfig> botConfigs) {
 		if (!init(botConfigs)) {
 			return false;
@@ -73,18 +77,28 @@ public class App {
 		});
 	}
 
-	private static Battle getBattle(int numberOfBots) {
-		// TODO
+	private static Battle getDefaultBattle(int numberOfBots) {
 		return new Battle(numberOfBots, DEFAULT_ROUNDS);
 	}
 
-	private static List<BotConfig> getBots(String[] args) {
+	private static List<BotConfig> getBotsFromArgs(String[] args) {
 		if (args == null || args.length == 0) {
 			System.out.println("Using default bots.");
 			return DEFAULT_BOTS;
 		}
-		// TODO
-		return DEFAULT_BOTS;
+		return getBotFileConfigs(args);
+	}
+
+	private static List<BotConfig> getBotFileConfigs(String[] args) {
+		List<BotConfig> botConfigs = new ArrayList<>();
+		for (String arg : args) {
+			File argFile = new File(arg);
+			if (!argFile.exists()) {
+				throw new IllegalArgumentException("File not found.");
+			}
+			botConfigs.add(new BotFileConfig(argFile));
+		}
+		return botConfigs;
 	}
 
 	private static boolean init(List<BotConfig> bots) {

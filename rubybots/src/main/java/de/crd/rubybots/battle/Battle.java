@@ -1,10 +1,10 @@
 package de.crd.rubybots.battle;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -93,9 +93,7 @@ public class Battle {
 	}
 
 	private void applyMoveResults(List<MoveResult> moveResults) {
-		List<Action> mergedActions = moveResults.stream().map(result -> result.getActions())
-				.flatMap(actions -> actions.stream()).collect(Collectors.toList());
-		Collections.shuffle(mergedActions);
+		List<Action> mergedActions = getMergedActionsStableShuffled(moveResults);
 		Map<Integer, Integer> actionsPerBot = new HashMap<>();
 		for (Action action : mergedActions) {
 			Integer actionsOfThisBot = actionsPerBot.get(action.getBotNumber());
@@ -110,5 +108,26 @@ public class Battle {
 			battlefield.applyAction(action);
 			Engine.getBattleStatsUpdateQueue().offer(battlefield.getBattleStats());
 		}
+	}
+
+	static List<Action> getMergedActionsStableShuffled(List<MoveResult> moveResults) {
+		Random random = new Random();
+		List<Action> mergedActions = new ArrayList<>();
+		// List<Action> mergedActions = moveResults.stream().map(result ->
+		// result.getActions())
+		// .flatMap(actions -> actions.stream()).collect(Collectors.toList());
+		// Collections.shuffle(mergedActions);// TODO keep order of one bot's
+		// // actions
+		List<List<Action>> actionSets = moveResults.stream().map(result -> result.getActions())
+				.filter(list -> list != null && !list.isEmpty()).collect(Collectors.toList());
+		while (!actionSets.isEmpty()) {
+			int takeFrom = random.nextInt(actionSets.size());
+			mergedActions.add(actionSets.get(takeFrom).get(0));
+			actionSets.get(takeFrom).remove(0);
+			if (actionSets.get(takeFrom).isEmpty()) {
+				actionSets.remove(takeFrom);
+			}
+		}
+		return mergedActions;
 	}
 }
