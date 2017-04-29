@@ -17,7 +17,7 @@ import de.crd.rubybots.engine.Engine;
 public class App {
 
 	private static final List<BotConfig> DEFAULT_BOTS = new ArrayList<>();
-	private static final int DEFAULT_ROUNDS = 3;
+	private static final int DEFAULT_ROUNDS = 5;
 
 	static {
 		DEFAULT_BOTS.add(new BotClasspathConfig("bot.rb"));
@@ -25,12 +25,20 @@ public class App {
 	}
 
 	public static void main(String[] args) {
-		System.out.println("RubyBots\n\n");
+		System.out.println("*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
 		setExceptionHandler();
-		if (!init(getBots(args))) {
+		List<BotConfig> botConfig = getBots(args);
+		Battle battle = getBattle(botConfig.size());
+		if (!startBattle(battle, botConfig)) {
 			System.exit(-1);
 		}
-		Battle battle = getBattle();
+		System.exit(0);
+	}
+
+	public static boolean startBattle(Battle battle, List<BotConfig> botConfigs) {
+		if (!init(botConfigs)) {
+			return false;
+		}
 		battle.execute();
 		Engine.shutdown();
 		try {
@@ -38,7 +46,7 @@ public class App {
 		} catch (InterruptedException e) {
 		}
 		printFinalStats(battle);
-		System.exit(0);
+		return true;
 	}
 
 	private static void printFinalStats(Battle battle) {
@@ -65,9 +73,9 @@ public class App {
 		});
 	}
 
-	private static Battle getBattle() {
+	private static Battle getBattle(int numberOfBots) {
 		// TODO
-		return new Battle(DEFAULT_ROUNDS);
+		return new Battle(numberOfBots, DEFAULT_ROUNDS);
 	}
 
 	private static List<BotConfig> getBots(String[] args) {

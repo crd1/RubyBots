@@ -14,18 +14,22 @@ import de.crd.rubybots.engine.Engine;
 
 public class Battle {
 	private static final Integer MAX_ACTIONS_PER_BOT = 3;
-	private final int numberOfBots = Engine.getNumberOfBots();
+	private final int numberOfBots;
 	private final Integer numberOfRounds;
 	private final UUID uuid = UUID.randomUUID();
 	private final long startTime = System.currentTimeMillis();
-	private final Battlefield battlefield = new Battlefield(this);
+	private final Battlefield battlefield;
 
-	public Battle(int numberOfRounds) {
+	public Battle(int numberOfBots, int numberOfRounds) {
+		this.numberOfBots = numberOfBots;
 		this.numberOfRounds = numberOfRounds;
+		this.battlefield = new Battlefield(this);
 	}
 
-	public Battle() {
+	public Battle(int numberOfBots) {
+		this.numberOfBots = numberOfBots;
 		this.numberOfRounds = null;
+		this.battlefield = new Battlefield(this);
 	}
 
 	public long getStartTime() {

@@ -1,6 +1,7 @@
-2.times do
+1.times do
 	$context.battlefield.move()
 end
+$context.battlefield.mine($context.battlefield.getMyPosition())
 target=rand($context.battlefield.size)
 detectedBot=$context.battlefield.whoIsAtPosition(target)
 if detectedBot != nil

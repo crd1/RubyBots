@@ -17,7 +17,7 @@ public class Action {
 	}
 
 	public enum ActionType {
-		MOVE, FIRE;
+		MOVE, SET_MINE, FIRE;
 	}
 
 	public int getBotNumber() {

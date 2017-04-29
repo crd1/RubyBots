@@ -12,6 +12,7 @@ import de.crd.rubybots.battle.Action.ActionType;
 public class Battlefield {
 
 	private static final int SPACE_PER_BOT = 5;
+	private static final Integer MINE_REPRESENTATION = -1;
 	private final Battle parentBattle;
 	private int currentRound;
 	private final Map<Integer, Integer> field;
@@ -81,6 +82,9 @@ public class Battlefield {
 		case FIRE:
 			fire(action.getBotNumber(), action.getTargetPosition());
 			break;
+		case SET_MINE:
+			mine(action.getBotNumber(), action.getTargetPosition());
+			break;
 		default:
 			System.out.println("Unhandled action: " + action.getActionType());
 			break;
@@ -92,15 +96,28 @@ public class Battlefield {
 		history.get(action.getBotNumber()).put(action.getActionType(), thisBotsActionsBefore + 1);
 	}
 
+	private void mine(int botNumber, Integer targetPosition) {
+		if (field.get(targetPosition) == null) {
+			field.put(targetPosition, MINE_REPRESENTATION);
+		} else {
+			System.out.println("Mining positions that are taken not possible. Skipping SET_MINE.");
+		}
+	}
+
 	private void move(int botNumber, int currentPosition) {
-		Integer nextFree = getNextFreePosition(currentPosition);
+		Integer nextFree = getNextFreePosition(currentPosition, true);
 		if (nextFree == null) {
 			System.out.println("No position to move to. Skipping MOVE.");
 			return;
 		}
 		// move the bot
 		field.put(currentPosition, null);
-		field.put(nextFree, botNumber);
+		if (field.get(nextFree) != MINE_REPRESENTATION) {
+			field.put(nextFree, botNumber);
+		} else {
+			System.out.println("Bot " + botNumber + " stepped on a mine.");
+			field.put(nextFree, null);
+		}
 	}
 
 	private void fire(int botNumber, int targetPosition) {
@@ -117,7 +134,7 @@ public class Battlefield {
 		}
 	}
 
-	private Integer getNextFreePosition(int currentPosition) {
+	private Integer getNextFreePosition(int currentPosition, boolean includeMined) {
 		for (int i = currentPosition + 1; i != currentPosition; i++) {
 			if (i == fieldSize) {
 				// overflow - this field is circular
@@ -125,6 +142,9 @@ public class Battlefield {
 				continue;
 			}
 			if (field.get(i) == null) {
+				return i;
+			}
+			if (includeMined && field.get(i) == MINE_REPRESENTATION) {
 				return i;
 			}
 		}
@@ -197,8 +217,22 @@ public class Battlefield {
 			this.moveResult.getActions().add(new Action(moveResult.getBotNumber(), targetPosition, ActionType.FIRE));
 		}
 
+		public void mine(int targetPosition) {
+			this.moveResult.getActions()
+					.add(new Action(moveResult.getBotNumber(), targetPosition, ActionType.SET_MINE));
+		}
+
 		public int getSize() {
 			return size;
+		}
+
+		public Integer getMyPosition() {
+			for (Entry<Integer, Integer> entry : _field.entrySet()) {
+				if (Integer.valueOf(moveResult.getBotNumber()).equals(entry.getValue())) {
+					return entry.getKey();
+				}
+			}
+			return null;
 		}
 
 		public Integer whoIsAtPosition(int position) {
