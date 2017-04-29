@@ -66,11 +66,11 @@ public class Battle {
 
 	private void executeRoundBasedBattle(Engine engine) {
 		do {
-			battlefield.nextRound();
 			if (battlefield.isOwned()) {
 				System.out.println("Battle has already been won. Not executing round " + battlefield.getCurrentRound());
 				break;
 			}
+			battlefield.nextRound();
 			callAllBots(battlefield.getCurrentRound(), engine);
 		} while (battlefield.getCurrentRound() < this.numberOfRounds);
 	}
