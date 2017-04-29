@@ -101,13 +101,13 @@ public class BattleStats {
 		sb.append(lineSeparator);
 		sb.append("Time passed: ");
 		sb.append(getTimestamp());
-		sb.append(" ms.");
+		sb.append(" ms");
 		sb.append(lineSeparator);
 		sb.append("Number of bots: ");
 		sb.append(getNumberOfBots());
 		sb.append(lineSeparator);
 		sb.append("Winner: ");
-		sb.append(getWinner() != null ? "Bot " + getWinner() + "(" + getWinnerName() + ")" : "Nobody");
+		sb.append(getWinner() != null ? "Bot " + getWinner() + " (" + getWinnerName() + ")" : "Nobody");
 		sb.append(lineSeparator);
 		sb.append("Rounds: ");
 		sb.append(getRounds());

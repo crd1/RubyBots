@@ -15,3 +15,4 @@ else
 	$context.log("Aiming at bot #{detectedBot}.")
 end
 $context.battlefield.fire(target)
+$context.battlefield.fire(rand($context.battlefield.size))

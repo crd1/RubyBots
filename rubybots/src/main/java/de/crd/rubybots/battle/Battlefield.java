@@ -8,11 +8,10 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import de.crd.rubybots.battle.Action.ActionType;
+import de.crd.rubybots.config.Constants;
 
 public class Battlefield {
 
-	private static final int SPACE_PER_BOT = 10;
-	private static final Integer MINE_REPRESENTATION = -1;
 	private final Battle parentBattle;
 	private int currentRound;
 	private final Map<Integer, Integer> field;
@@ -44,7 +43,7 @@ public class Battlefield {
 	}
 
 	private int getFieldSize(int numberOfBots) {
-		return numberOfBots * SPACE_PER_BOT;
+		return numberOfBots * Constants.SPACE_PER_BOT;
 	}
 
 	/**
@@ -52,7 +51,7 @@ public class Battlefield {
 	 */
 	private void initField(final int numberOfBots) {
 		for (int i = 0; i < numberOfBots; i++) {
-			field.put(i * SPACE_PER_BOT, i);
+			field.put(i * Constants.SPACE_PER_BOT, i);
 		}
 	}
 
@@ -102,7 +101,7 @@ public class Battlefield {
 
 	private void mine(int botNumber, Integer targetPosition) {
 		if (field.get(targetPosition) == null) {
-			field.put(targetPosition, MINE_REPRESENTATION);
+			field.put(targetPosition, Constants.MINE_REPRESENTATION);
 		} else {
 			System.out.println("Mining positions that are taken not possible. Skipping SET_MINE.");
 		}
@@ -116,7 +115,7 @@ public class Battlefield {
 		}
 		// move the bot
 		field.put(currentPosition, null);
-		if (field.get(nextFree) != MINE_REPRESENTATION) {
+		if (field.get(nextFree) != Constants.MINE_REPRESENTATION) {
 			field.put(nextFree, botNumber);
 		} else {
 			System.out.println("Bot " + botNumber + " stepped on a mine.");
@@ -126,12 +125,15 @@ public class Battlefield {
 
 	private void fire(int botNumber, int targetPosition) {
 		if (targetPosition >= 0 && targetPosition < fieldSize) {
-			Integer botFiredAt = field.get(targetPosition);
+			Integer firedAt = field.get(targetPosition);
+			if (firedAt == null || firedAt == Constants.MINE_REPRESENTATION) {
+				return;
+			}
 			field.remove(targetPosition);
-			if (botFiredAt != null && botFiredAt == botNumber) {
+			if (firedAt == botNumber) {
 				System.out.println("Bot " + botNumber + " commited suicide.");
-			} else if (botFiredAt != null && botFiredAt != botNumber) {
-				System.out.println("Bot " + botNumber + " destroyed bot " + botFiredAt);
+			} else if (firedAt != botNumber) {
+				System.out.println("Bot " + botNumber + " destroyed bot " + firedAt);
 			}
 		} else {
 			System.out.println("Bot " + botNumber + " fired outside of field.");
@@ -148,7 +150,7 @@ public class Battlefield {
 			if (field.get(i) == null) {
 				return i;
 			}
-			if (includeMined && field.get(i) == MINE_REPRESENTATION) {
+			if (includeMined && field.get(i) == Constants.MINE_REPRESENTATION) {
 				return i;
 			}
 		}
@@ -183,7 +185,7 @@ public class Battlefield {
 			Integer botOnField = field.get(i);
 			if (botOnField == null) {
 				sb.append("-");
-			} else if (botOnField == MINE_REPRESENTATION) {
+			} else if (botOnField == Constants.MINE_REPRESENTATION) {
 				sb.append("#");
 			} else {
 				sb.append(botOnField);
@@ -257,8 +259,8 @@ public class Battlefield {
 	}
 
 	public Integer getWinner() {
-		List<Integer> menStanding = field.values().stream().filter(bot -> (bot != null && bot != MINE_REPRESENTATION))
-				.collect(Collectors.toList());
+		List<Integer> menStanding = field.values().stream()
+				.filter(bot -> (bot != null && bot != Constants.MINE_REPRESENTATION)).collect(Collectors.toList());
 		Collections.sort(menStanding);
 		if (menStanding.size() != 1) {
 			// System.out.println("No winner. Men standing are: " +

@@ -11,12 +11,11 @@ import java.util.stream.Collectors;
 
 import javax.script.ScriptException;
 
-import de.crd.rubybots.battle.Action.ActionType;
 import de.crd.rubybots.bots.BotConfig;
+import de.crd.rubybots.config.Constants;
 import de.crd.rubybots.engine.Engine;
 
 public class Battle {
-	private static final Integer MAX_ACTIONS_PER_BOT = 3;
 	private final List<BotConfig> botConfigs;
 	private final Integer numberOfRounds;
 	private final UUID uuid = UUID.randomUUID();
@@ -104,7 +103,7 @@ public class Battle {
 			if (actionsOfThisBot == null) {
 				actionsOfThisBot = 0;
 			}
-			if (actionsOfThisBot >= MAX_ACTIONS_PER_BOT) {
+			if (actionsOfThisBot >= Constants.MAX_ACTIONS_PER_BOT) {
 				System.out.println("Skipping illegal action of bot " + action.getBotNumber());
 				continue;
 			}

@@ -2,3 +2,4 @@
 	$context.battlefield.move()
 end
 $context.battlefield.mine($context.battlefield.getMyPosition())
+$context.battlefield.mine($context.battlefield.getMyPosition() + 1)
