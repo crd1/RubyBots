@@ -32,7 +32,7 @@ public class RubyBots {
 		setExceptionHandler();
 		List<BotConfig> botConfig = getBotsFromArgs(args);
 		Battle battle = getDefaultBattle(botConfig.size());
-		RubyBots rubyBots = new RubyBots(getBattleStatsUpdateListener());
+		RubyBots rubyBots = new RubyBots(getDefaultBattleStatsUpdateListener());
 		if (!rubyBots.startBattle(battle, botConfig)) {
 			System.exit(-1);
 		}
@@ -45,7 +45,7 @@ public class RubyBots {
 		System.exit(0);
 	}
 
-	private static BattleStatsUpdateListener getBattleStatsUpdateListener() {
+	private static BattleStatsUpdateListener getDefaultBattleStatsUpdateListener() {
 		return new BattleStatsUpdateListener() {
 
 			@Override
@@ -80,15 +80,7 @@ public class RubyBots {
 
 	private static void printFinalStats(Battle battle) {
 		BattleStats finalStats = battle.getCurrentBattleStats();
-		System.out.println("\n\n***************************");
-		System.out.println("Time passed: " + finalStats.getTimestamp() + " ms.");
-		System.out.println("Number of bots: " + finalStats.getNumberOfBots());
-		System.out.println("Winner: " + (finalStats.getWinner() != null ? "Bot " + finalStats.getWinner() : "Nobody"));
-		System.out.println("Rounds: " + finalStats.getRounds());
-		System.out.println("History: " + finalStats.getHistory());
-		System.out.println("Summed up history: " + finalStats.getSummedUpHistory());
-		System.out.println("Final Battlefield: " + finalStats.getBattlefield());
-		System.out.println("***************************");
+		System.out.println(finalStats.getComprehensiveStats());
 	}
 
 	private static void setExceptionHandler() {

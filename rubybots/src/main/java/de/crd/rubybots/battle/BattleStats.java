@@ -92,4 +92,36 @@ public class BattleStats {
 		return numberOfBots;
 	}
 
+	public String getComprehensiveStats() {
+		String lineSeparator = System.getProperty("line.separator");
+		StringBuilder sb = new StringBuilder();
+		sb.append(lineSeparator);
+		sb.append(lineSeparator);
+		sb.append("***************************");
+		sb.append(lineSeparator);
+		sb.append("Time passed: ");
+		sb.append(getTimestamp());
+		sb.append(" ms.");
+		sb.append(lineSeparator);
+		sb.append("Number of bots: ");
+		sb.append(getNumberOfBots());
+		sb.append(lineSeparator);
+		sb.append("Winner: ");
+		sb.append(getWinner() != null ? "Bot " + getWinner() : "Nobody");
+		sb.append(lineSeparator);
+		sb.append("Rounds: ");
+		sb.append(getRounds());
+		sb.append(lineSeparator);
+		sb.append("History: ");
+		sb.append(getHistory());
+		sb.append(lineSeparator);
+		sb.append("Summed up history: ");
+		sb.append(getSummedUpHistory());
+		sb.append(lineSeparator);
+		sb.append("Final Battlefield: ");
+		sb.append(getBattlefield());
+		sb.append(lineSeparator);
+		sb.append("***************************");
+		return sb.toString();
+	}
 }
