@@ -2,7 +2,11 @@ package de.crd.rubybots.battle;
 
 public class BattleStats {
 
-	private final long timestamp = System.currentTimeMillis();
+	private final long timestamp;
+
+	public BattleStats(long battleStart) {
+		this.timestamp = System.currentTimeMillis() - battleStart;
+	}
 
 	@Override
 	public String toString() {
@@ -29,6 +33,11 @@ public class BattleStats {
 		if (timestamp != other.timestamp)
 			return false;
 		return true;
+	}
+
+	public static BattleStats calculateStats(long startTime, Battlefield battlefield) {
+		// TODO
+		return new BattleStats(startTime);
 	}
 
 }

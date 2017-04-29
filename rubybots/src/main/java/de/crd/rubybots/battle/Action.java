@@ -8,6 +8,10 @@ public class Action {
 		this.actionType = actionType;
 	}
 
+	public ActionType getActionType() {
+		return actionType;
+	}
+
 	public enum ActionType {
 		MOVE;
 	}

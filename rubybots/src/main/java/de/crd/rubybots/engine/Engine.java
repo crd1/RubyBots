@@ -21,7 +21,6 @@ import javax.script.SimpleBindings;
 import de.crd.rubybots.App;
 import de.crd.rubybots.battle.BattleStats;
 import de.crd.rubybots.battle.Context;
-import de.crd.rubybots.battle.MoveResult;
 import de.crd.rubybots.bots.BotClasspathConfig;
 import de.crd.rubybots.bots.BotFileConfig;
 

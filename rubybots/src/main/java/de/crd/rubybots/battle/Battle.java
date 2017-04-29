@@ -15,14 +15,19 @@ public class Battle {
 	private final int numberOfBots = Engine.getNumberOfBots();
 	private final Integer numberOfRounds;
 	private final UUID uuid = UUID.randomUUID();
-	private final Battlefield battlefield = new Battlefield();
+	private final long startTime = System.currentTimeMillis();
+	private final Battlefield battlefield = new Battlefield(this);
 
 	public Battle(int numberOfRounds) {
 		this.numberOfRounds = numberOfRounds;
 	}
 
-	public Battle(Queue<BattleStats> statsUpdateQueue) {
+	public Battle() {
 		this.numberOfRounds = null;
+	}
+
+	public long getStartTime() {
+		return startTime;
 	}
 
 	public void execute() {
@@ -32,20 +37,25 @@ public class Battle {
 		} else {
 			executeLastManStanding();
 		}
-		System.out.println("End of battle " + uuid);
+		Integer winner = battlefield.getWinner();
+		System.out.println("End of battle " + uuid + ". Winner is: " + ((winner != null) ? winner : "nobody"));
 	}
 
 	private void executeLastManStanding() {
-		int currentRound = 1;
 		while (!battlefield.isOwned()) {
-			callAllBots(currentRound++);
+			callAllBots(battlefield.nextRound());
 		}
 	}
 
 	private void executeRoundBasedBattle() {
-		for (int currentRound = 1; currentRound <= this.numberOfRounds; currentRound++) {
-			callAllBots(currentRound);
-		}
+		do {
+			battlefield.nextRound();
+			if (battlefield.isOwned()) {
+				System.out.println("Battle has already been won. Not executing round " + battlefield.getCurrentRound());
+				break;
+			}
+			callAllBots(battlefield.getCurrentRound());
+		} while (battlefield.getCurrentRound() < this.numberOfRounds);
 	}
 
 	private void callAllBots(int round) {

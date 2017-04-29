@@ -4,6 +4,21 @@ import de.crd.rubybots.battle.Action.ActionType;
 
 public class Battlefield {
 
+	private final Battle parentBattle;
+	private int currentRound;
+
+	public Battlefield(Battle parentBattle) {
+		this.parentBattle = parentBattle;
+	}
+
+	public int getCurrentRound() {
+		return currentRound;
+	}
+
+	public int nextRound() {
+		return ++currentRound;
+	}
+
 	public BattlefieldView toView() {
 		return new BattlefieldView();
 	}
@@ -12,6 +27,10 @@ public class Battlefield {
 		// TODO
 	}
 
+	/**
+	 * This mechanism serves to prevent the bot from manipulating the moveResult
+	 * directly but to publish the result anyway.
+	 */
 	public static MoveResult extractMoveResult(BattlefieldView battlefieldView) {
 		return battlefieldView.moveResult;
 	}
@@ -26,13 +45,11 @@ public class Battlefield {
 	 * 
 	 */
 	public boolean isOwned() {
-		// TODO
-		return false;
+		return getWinner() != null;
 	}
 
 	public BattleStats getBattleStats() {
-		// TODO
-		return new BattleStats();
+		return BattleStats.calculateStats(parentBattle.getStartTime(), this);
 	}
 
 	public static class BattlefieldView {
@@ -41,5 +58,10 @@ public class Battlefield {
 		public void move() {
 			this.moveResult.getActions().add(new Action(ActionType.MOVE));
 		}
+	}
+
+	public Integer getWinner() {
+		// TODO
+		return null;
 	}
 }
