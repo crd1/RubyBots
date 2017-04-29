@@ -67,7 +67,8 @@ public class Battle {
 	private void executeRoundBasedBattle(Engine engine) {
 		do {
 			if (battlefield.isOwned()) {
-				System.out.println("Battle has already been won. Not executing round " + battlefield.getCurrentRound());
+				System.out.println(
+						"Battle has already been won. Not executing round " + (battlefield.getCurrentRound() + 1));
 				break;
 			}
 			battlefield.nextRound();
