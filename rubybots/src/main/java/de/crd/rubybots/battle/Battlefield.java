@@ -1,9 +1,11 @@
 package de.crd.rubybots.battle;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.crd.rubybots.battle.Action.ActionType;
 
@@ -51,7 +53,7 @@ public class Battlefield {
 	}
 
 	public BattlefieldView toView(int botNumber) {
-		return new BattlefieldView(botNumber);
+		return new BattlefieldView(botNumber, fieldSize, field);
 	}
 
 	public void applyAction(Action action) {
@@ -60,9 +62,13 @@ public class Battlefield {
 			System.out.println("Bot has already been destroyed. Skipping action for bot " + action.getBotNumber());
 			return;
 		}
+		System.out.println("Applying action " + action.getActionType() + " for bot " + action.getBotNumber());
 		switch (action.getActionType()) {
 		case MOVE:
 			move(action.getBotNumber(), currentPositionOfBot);
+			break;
+		case FIRE:
+			fire(action.getBotNumber(), action.getTargetPosition());
 			break;
 		default:
 			System.out.println("Unhandled action: " + action.getActionType());
@@ -79,6 +85,20 @@ public class Battlefield {
 		// move the bot
 		field.put(currentPosition, null);
 		field.put(nextFree, botNumber);
+	}
+
+	private void fire(int botNumber, int targetPosition) {
+		if (targetPosition >= 0 && targetPosition < fieldSize) {
+			Integer botFiredAt = field.get(targetPosition);
+			field.remove(targetPosition);
+			if (botFiredAt != null && botFiredAt == botNumber) {
+				System.out.println("Bot " + botNumber + " commited suicide.");
+			} else if (botFiredAt != null && botFiredAt != botNumber) {
+				System.out.println("Bot " + botNumber + " destroyed bot " + botFiredAt);
+			}
+		} else {
+			System.out.println("Bot " + botNumber + " fired outside of field.");
+		}
 	}
 
 	private Integer getNextFreePosition(int currentPosition) {
@@ -140,27 +160,46 @@ public class Battlefield {
 
 	public static class BattlefieldView {
 		private final MoveResult moveResult;
+		private final int size;
+		private final Map<Integer, Integer> _field;
 
-		public BattlefieldView(int botNumber) {
+		public BattlefieldView(int botNumber, int battlefieldSize, Map<Integer, Integer> field) {
+			this.size = battlefieldSize;
 			this.moveResult = new MoveResult(botNumber);
+			this._field = new HashMap<>(field);
 		}
 
 		public void move() {
-			this.moveResult.getActions().add(new Action(moveResult.getBotNumber(), ActionType.MOVE));
+			this.moveResult.getActions().add(new Action(moveResult.getBotNumber(), null, ActionType.MOVE));
+		}
+
+		public void fire(int targetPosition) {
+			this.moveResult.getActions().add(new Action(moveResult.getBotNumber(), targetPosition, ActionType.FIRE));
+		}
+
+		public int getSize() {
+			return size;
+		}
+
+		public Integer whoIsAtPosition(int position) {
+			return _field.get(position);
 		}
 
 		@Override
 		public String toString() {
-			return "BattlefieldView [moveResult=" + moveResult + "]";
+			return "BattlefieldView [moveResult=" + moveResult + ", size=" + size + "]";
 		}
+
 	}
 
 	public Integer getWinner() {
-		Set<Entry<Integer, Integer>> entrySet = field.entrySet();
-		if (entrySet.size() > 0) {
+		List<Integer> menStanding = field.values().stream().filter(bot -> bot != null).collect(Collectors.toList());
+		Collections.sort(menStanding);
+		if (menStanding.size() != 1) {
+			System.out.println("No winner. Men standing are: " + menStanding);
 			return null;
 		}
-		return entrySet.iterator().next().getValue(); // last man standing...
+		return menStanding.get(0); // last man standing...
 	}
 
 }

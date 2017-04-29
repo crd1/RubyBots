@@ -5,9 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.script.ScriptException;
 
 import de.crd.rubybots.engine.Engine;
 
@@ -68,7 +69,13 @@ public class Battle {
 		List<MoveResult> moveResults = new ArrayList<>();
 		for (int currentBot = 0; currentBot < numberOfBots; currentBot++) {
 			Context context = new Context(currentBot, round, battlefield.toView(currentBot), numberOfBots);
-			Engine.callBot(context); // this changes the battlefieldView
+			try {
+				Engine.callBot(context);// this changes the battlefieldView
+			} catch (ScriptException e) {
+				System.out.println(e.getMessage());
+				System.out.println("Script of bot " + currentBot + " contained script error. Skipping bot.");
+				continue;
+			}
 			MoveResult result = Battlefield.extractMoveResult(context.getBattlefield());
 			moveResults.add(result);
 			System.out.println("Obtained move result: " + result);

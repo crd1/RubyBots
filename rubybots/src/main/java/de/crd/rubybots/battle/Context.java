@@ -32,6 +32,10 @@ public class Context {
 		return numberOfBots;
 	}
 
+	public void log(String log) {
+		System.out.println("Bot " + botNumber + ": " + log);
+	}
+
 	@Override
 	public String toString() {
 		return "Context [botNumber=" + botNumber + ", round=" + round + ", battlefieldView=" + battlefield

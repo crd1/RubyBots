@@ -68,15 +68,11 @@ public class Engine {
 		return bots.size();
 	}
 
-	public static void callBot(Context context) {
+	public static void callBot(Context context) throws ScriptException {
 		System.out.println("Calling bot " + context.getBotNumber());
-		try {
-			Bindings bindings = new SimpleBindings();
-			bindings.put("context", context);
-			jruby.eval(bots.get(context.getBotNumber()), bindings);
-		} catch (ScriptException e) {
-			throw new IllegalStateException("Scripting failed", e);
-		}
+		Bindings bindings = new SimpleBindings();
+		bindings.put("context", context);
+		jruby.eval(bots.get(context.getBotNumber()), bindings);
 		System.out.println("Bot call " + context + " returned.");
 	}
 
@@ -109,6 +105,7 @@ public class Engine {
 	}
 
 	public static void shutdown() {
+		System.out.println("Shutting down engine.");
 		backgroundExecutor.shutdownNow();
 	}
 
