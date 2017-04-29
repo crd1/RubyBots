@@ -113,11 +113,6 @@ public class Battle {
 	static List<Action> getMergedActionsStableShuffled(List<MoveResult> moveResults) {
 		Random random = new Random();
 		List<Action> mergedActions = new ArrayList<>();
-		// List<Action> mergedActions = moveResults.stream().map(result ->
-		// result.getActions())
-		// .flatMap(actions -> actions.stream()).collect(Collectors.toList());
-		// Collections.shuffle(mergedActions);// TODO keep order of one bot's
-		// // actions
 		List<List<Action>> actionSets = moveResults.stream().map(result -> result.getActions())
 				.filter(list -> list != null && !list.isEmpty()).collect(Collectors.toList());
 		while (!actionSets.isEmpty()) {
