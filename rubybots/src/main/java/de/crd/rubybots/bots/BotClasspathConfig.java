@@ -12,4 +12,14 @@ public class BotClasspathConfig implements BotConfig {
 		return classpathReference;
 	}
 
+	@Override
+	public String getName() {
+		return classpathReference;
+	}
+
+	@Override
+	public String toString() {
+		return "BotClasspathConfig [classpathReference=" + classpathReference + "]";
+	}
+
 }

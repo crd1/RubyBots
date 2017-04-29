@@ -68,6 +68,10 @@ public class Battlefield {
 		return new BattlefieldView(botNumber, fieldSize, field);
 	}
 
+	public Battle getParentBattle() {
+		return parentBattle;
+	}
+
 	public void applyAction(Action action) {
 		Integer currentPositionOfBot = getPosition(action.getBotNumber());
 		if (currentPositionOfBot == null) {

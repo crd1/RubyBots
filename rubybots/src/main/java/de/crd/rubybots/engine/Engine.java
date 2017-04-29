@@ -63,7 +63,7 @@ public class Engine {
 				System.out.println("Found bot:\n" + bot);
 				bots.add(bot);
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new IllegalStateException("Loading bot from classpath failed.");
 			}
 			i++;
 		}

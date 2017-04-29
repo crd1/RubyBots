@@ -1,6 +1,7 @@
 package de.crd.rubybots.battle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,26 +11,26 @@ import java.util.stream.Collectors;
 
 import javax.script.ScriptException;
 
+import de.crd.rubybots.battle.Action.ActionType;
+import de.crd.rubybots.bots.BotConfig;
 import de.crd.rubybots.engine.Engine;
 
 public class Battle {
 	private static final Integer MAX_ACTIONS_PER_BOT = 3;
-	private final int numberOfBots;
+	private final List<BotConfig> botConfigs;
 	private final Integer numberOfRounds;
 	private final UUID uuid = UUID.randomUUID();
 	private final long startTime = System.currentTimeMillis();
 	private final Battlefield battlefield;
-	
-	public Battle(int numberOfBots, int numberOfRounds) {
-		this.numberOfBots = numberOfBots;
+
+	public Battle(Integer numberOfRounds, List<BotConfig> botConfigs) {
 		this.numberOfRounds = numberOfRounds;
+		this.botConfigs = Collections.unmodifiableList(botConfigs);
 		this.battlefield = new Battlefield(this);
 	}
 
-	public Battle(int numberOfBots) {
-		this.numberOfBots = numberOfBots;
-		this.numberOfRounds = null;
-		this.battlefield = new Battlefield(this);
+	public Battle(List<BotConfig> botConfigs) {
+		this(null, botConfigs);
 	}
 
 	public long getStartTime() {
@@ -37,9 +38,12 @@ public class Battle {
 	}
 
 	public int getNumberOfBots() {
-		return numberOfBots;
+		return botConfigs.size();
 	}
 
+	/**
+	 * NON-API
+	 */
 	public void execute(Engine engine) {
 		System.out.println("Begin of battle " + uuid);
 		if (numberOfRounds != null) {
@@ -75,8 +79,8 @@ public class Battle {
 	private void callAllBots(int round, Engine engine) {
 		System.out.println("--------------------------------------\nCalling all bots for round " + round);
 		List<MoveResult> moveResults = new ArrayList<>();
-		for (int currentBot = 0; currentBot < numberOfBots; currentBot++) {
-			Context context = new Context(currentBot, round, battlefield.toView(currentBot), numberOfBots);
+		for (int currentBot = 0; currentBot < getNumberOfBots(); currentBot++) {
+			Context context = new Context(currentBot, round, battlefield.toView(currentBot), getNumberOfBots());
 			try {
 				engine.callBot(context);// this changes the battlefieldView
 			} catch (ScriptException e) {
@@ -124,5 +128,9 @@ public class Battle {
 			}
 		}
 		return mergedActions;
+	}
+
+	public List<BotConfig> getBotConfigs() {
+		return botConfigs;
 	}
 }

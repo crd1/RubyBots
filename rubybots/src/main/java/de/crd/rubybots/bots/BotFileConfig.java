@@ -14,4 +14,9 @@ public class BotFileConfig implements BotConfig {
 		return botFile;
 	}
 
+	@Override
+	public String getName() {
+		return botFile.getName();
+	}
+
 }

@@ -107,7 +107,7 @@ public class BattleStats {
 		sb.append(getNumberOfBots());
 		sb.append(lineSeparator);
 		sb.append("Winner: ");
-		sb.append(getWinner() != null ? "Bot " + getWinner() : "Nobody");
+		sb.append(getWinner() != null ? "Bot " + getWinner() + "(" + getWinnerName() + ")" : "Nobody");
 		sb.append(lineSeparator);
 		sb.append("Rounds: ");
 		sb.append(getRounds());
@@ -123,5 +123,13 @@ public class BattleStats {
 		sb.append(lineSeparator);
 		sb.append("***************************");
 		return sb.toString();
+	}
+
+	private String getWinnerName() {
+		Integer winner = getWinner();
+		if (winner == null) {
+			return "N/A";
+		}
+		return battleField.getParentBattle().getBotConfigs().get(winner).getName();
 	}
 }

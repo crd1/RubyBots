@@ -20,20 +20,22 @@ public class RubyBots {
 	private static final List<BotConfig> DEFAULT_BOTS = new ArrayList<>();
 	private static final int DEFAULT_ROUNDS = 5;
 
+	private final List<BotConfig> botConfigs;
 	private final Engine mEngine;
+	private boolean initialized;
 
 	static {
-		DEFAULT_BOTS.add(new BotClasspathConfig("bot.rb"));
-		DEFAULT_BOTS.add(new BotClasspathConfig("bot.rb"));
+		DEFAULT_BOTS.add(new BotClasspathConfig("hunter.rb"));
+		DEFAULT_BOTS.add(new BotClasspathConfig("hunted.rb"));
 	}
 
 	public static void main(String[] args) {
 		System.out.println("*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
 		setExceptionHandler();
 		List<BotConfig> botConfig = getBotsFromArgs(args);
-		Battle battle = getDefaultBattle(botConfig.size());
-		RubyBots rubyBots = new RubyBots(getDefaultBattleStatsUpdateListener());
-		if (!rubyBots.startBattle(battle, botConfig)) {
+		RubyBots rubyBots = new RubyBots(getDefaultBattleStatsUpdateListener(), botConfig);
+		Battle battle = null;
+		if ((battle = rubyBots.startBattle(DEFAULT_ROUNDS)) == null) {
 			System.exit(-1);
 		}
 		rubyBots.shutdown();
@@ -59,8 +61,9 @@ public class RubyBots {
 		System.out.println("New BattleStats: " + battleStatsUpdate);
 	}
 
-	public RubyBots(BattleStatsUpdateListener listener) {
+	public RubyBots(BattleStatsUpdateListener listener, List<BotConfig> botConfigs) {
 		this.mEngine = new Engine(listener);
+		this.botConfigs = botConfigs;
 	}
 
 	public void shutdown() {
@@ -70,12 +73,13 @@ public class RubyBots {
 	/**
 	 * API ENTRY POINT
 	 */
-	public boolean startBattle(Battle battle, List<BotConfig> botConfigs) {
+	public Battle startBattle(Integer numberOfRounds) {
 		if (!init(botConfigs)) {
-			return false;
+			return null;
 		}
+		Battle battle = new Battle(numberOfRounds, botConfigs);
 		battle.execute(mEngine);
-		return true;
+		return battle;
 	}
 
 	private static void printFinalStats(Battle battle) {
@@ -92,10 +96,6 @@ public class RubyBots {
 				System.exit(-1);
 			}
 		});
-	}
-
-	private static Battle getDefaultBattle(int numberOfBots) {
-		return new Battle(numberOfBots, DEFAULT_ROUNDS);
 	}
 
 	private static List<BotConfig> getBotsFromArgs(String[] args) {
@@ -119,14 +119,18 @@ public class RubyBots {
 	}
 
 	private boolean init(List<BotConfig> bots) {
+		if (initialized) {
+			return true;
+		}
 		try {
 			mEngine.prepareEngine();
 			mEngine.loadBotsFromClasspath(getConfigsOfType(bots, BotClasspathConfig.class));
 			mEngine.loadBotsFromFiles(getConfigsOfType(bots, BotFileConfig.class));
-		} catch (ScriptException e) {
-			System.out.println("RubyBots could not be initialized.");
+		} catch (ScriptException | IllegalStateException e) {
+			System.out.println("RubyBots could not be initialized: " + e.getMessage());
 			return false;
 		}
+		initialized = true;
 		return true;
 	}
 
