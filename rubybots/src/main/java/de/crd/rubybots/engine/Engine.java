@@ -18,7 +18,8 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
-import de.crd.rubybots.App;
+import de.crd.rubybots.RubyBots;
+import de.crd.rubybots.RubyBots.BattleStatsUpdateListener;
 import de.crd.rubybots.battle.BattleStats;
 import de.crd.rubybots.battle.Context;
 import de.crd.rubybots.bots.BotClasspathConfig;
@@ -26,13 +27,18 @@ import de.crd.rubybots.bots.BotFileConfig;
 
 public class Engine {
 
-	private static volatile ScriptEngine jruby;
-	private static final List<String> bots = new ArrayList<>();
-	private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
-	private static volatile boolean preparingEngine;
-	private static final BlockingQueue<BattleStats> battleStatsUpdateQueue = new LinkedBlockingQueue<>();
+	private volatile ScriptEngine jruby;
+	private final List<String> bots = new ArrayList<>();
+	private final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
+	private volatile boolean preparingEngine;
+	private final BlockingQueue<BattleStats> battleStatsUpdateQueue = new LinkedBlockingQueue<>();
+	private final BattleStatsUpdateListener battleStatsUpdateListener;
 
-	public static void prepareEngine() throws ScriptException {
+	public Engine(BattleStatsUpdateListener listener) {
+		this.battleStatsUpdateListener = listener;
+	}
+
+	public void prepareEngine() throws ScriptException {
 		System.out.print("Preparing engine.");
 		preparingEngine = true;
 		backgroundExecutor.execute(new ProgressTask());
@@ -45,13 +51,13 @@ public class Engine {
 		System.out.println("Done preparing engine.");
 	}
 
-	public static void loadBotsFromClasspath(List<BotClasspathConfig> botConfigs) {
+	public void loadBotsFromClasspath(List<BotClasspathConfig> botConfigs) {
 		System.out.println("Loading bots from classpath.");
 		int i = getNumberOfBots();
 		for (BotClasspathConfig botConfig : botConfigs) {
 			System.out.println("Loading bot nr " + i + " from " + botConfig);
 			try (InputStreamReader isr = new InputStreamReader(
-					App.class.getResourceAsStream("/" + botConfig.getClasspathReference()));
+					RubyBots.class.getResourceAsStream("/" + botConfig.getClasspathReference()));
 					BufferedReader br = new BufferedReader(isr);) {
 				String bot = br.lines().collect(Collectors.joining(System.getProperty("line.separator")));
 				System.out.println("Found bot:\n" + bot);
@@ -64,11 +70,11 @@ public class Engine {
 		System.out.println("Done loading bots from classpath.");
 	}
 
-	public static int getNumberOfBots() {
+	public int getNumberOfBots() {
 		return bots.size();
 	}
 
-	public static void callBot(Context context) throws ScriptException {
+	public void callBot(Context context) throws ScriptException {
 		System.out.println("Calling bot " + context.getBotNumber());
 		Bindings bindings = new SimpleBindings();
 		bindings.put("context", context);
@@ -76,12 +82,7 @@ public class Engine {
 		System.out.println("Bot call " + context + " returned.");
 	}
 
-	private static void displayBattleStatsUpdate(BattleStats battleStatsUpdate) {
-		// TODO
-		System.out.println("New BattleStats: " + battleStatsUpdate);
-	}
-
-	private static class ProgressTask implements Runnable {
+	private class ProgressTask implements Runnable {
 
 		@Override
 		public void run() {
@@ -96,7 +97,7 @@ public class Engine {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
 					BattleStats battleStatsUpdate = battleStatsUpdateQueue.take();
-					displayBattleStatsUpdate(battleStatsUpdate);
+					battleStatsUpdateListener.onBattleStatsUpdate(battleStatsUpdate);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
@@ -104,12 +105,12 @@ public class Engine {
 		}
 	}
 
-	public static void shutdown() {
+	public void shutdown() {
 		System.out.println("Shutting down engine.");
 		backgroundExecutor.shutdownNow();
 	}
 
-	public static void loadBotsFromFiles(List<BotFileConfig> botConfigs) {
+	public void loadBotsFromFiles(List<BotFileConfig> botConfigs) {
 		System.out.println("Loading bots from files.");
 		int i = getNumberOfBots();
 		for (BotFileConfig botConfig : botConfigs) {
@@ -128,7 +129,7 @@ public class Engine {
 		System.out.println("Done loading bots from files.");
 	}
 
-	public static Queue<BattleStats> getBattleStatsUpdateQueue() {
+	public Queue<BattleStats> getBattleStatsUpdateQueue() {
 		return battleStatsUpdateQueue;
 	}
 }

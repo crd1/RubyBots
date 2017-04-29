@@ -15,10 +15,12 @@ import de.crd.rubybots.bots.BotConfig;
 import de.crd.rubybots.bots.BotFileConfig;
 import de.crd.rubybots.engine.Engine;
 
-public class App {
+public class RubyBots {
 
 	private static final List<BotConfig> DEFAULT_BOTS = new ArrayList<>();
 	private static final int DEFAULT_ROUNDS = 5;
+
+	private final Engine mEngine;
 
 	static {
 		DEFAULT_BOTS.add(new BotClasspathConfig("bot.rb"));
@@ -30,26 +32,49 @@ public class App {
 		setExceptionHandler();
 		List<BotConfig> botConfig = getBotsFromArgs(args);
 		Battle battle = getDefaultBattle(botConfig.size());
-		if (!startBattle(battle, botConfig)) {
+		RubyBots rubyBots = new RubyBots(getBattleStatsUpdateListener());
+		if (!rubyBots.startBattle(battle, botConfig)) {
 			System.exit(-1);
 		}
-		System.exit(0);
-	}
-
-	/**
-	 * API ENTRY POINT
-	 */
-	public static boolean startBattle(Battle battle, List<BotConfig> botConfigs) {
-		if (!init(botConfigs)) {
-			return false;
-		}
-		battle.execute();
-		Engine.shutdown();
+		rubyBots.shutdown();
 		try {
 			Thread.sleep(1000L);
 		} catch (InterruptedException e) {
 		}
 		printFinalStats(battle);
+		System.exit(0);
+	}
+
+	private static BattleStatsUpdateListener getBattleStatsUpdateListener() {
+		return new BattleStatsUpdateListener() {
+
+			@Override
+			public void onBattleStatsUpdate(BattleStats battleStats) {
+				displayBattleStatsUpdate(battleStats);
+			}
+		};
+	}
+
+	private static void displayBattleStatsUpdate(BattleStats battleStatsUpdate) {
+		System.out.println("New BattleStats: " + battleStatsUpdate);
+	}
+
+	public RubyBots(BattleStatsUpdateListener listener) {
+		this.mEngine = new Engine(listener);
+	}
+
+	public void shutdown() {
+		mEngine.shutdown();
+	}
+
+	/**
+	 * API ENTRY POINT
+	 */
+	public boolean startBattle(Battle battle, List<BotConfig> botConfigs) {
+		if (!init(botConfigs)) {
+			return false;
+		}
+		battle.execute(mEngine);
 		return true;
 	}
 
@@ -101,11 +126,11 @@ public class App {
 		return botConfigs;
 	}
 
-	private static boolean init(List<BotConfig> bots) {
+	private boolean init(List<BotConfig> bots) {
 		try {
-			Engine.prepareEngine();
-			Engine.loadBotsFromClasspath(getConfigsOfType(bots, BotClasspathConfig.class));
-			Engine.loadBotsFromFiles(getConfigsOfType(bots, BotFileConfig.class));
+			mEngine.prepareEngine();
+			mEngine.loadBotsFromClasspath(getConfigsOfType(bots, BotClasspathConfig.class));
+			mEngine.loadBotsFromFiles(getConfigsOfType(bots, BotFileConfig.class));
 		} catch (ScriptException e) {
 			System.out.println("RubyBots could not be initialized.");
 			return false;
@@ -116,6 +141,10 @@ public class App {
 	private static <T extends BotConfig> List<T> getConfigsOfType(List<BotConfig> botConfigs, Class<T> configType) {
 		return botConfigs.stream().filter(botConfig -> configType.isAssignableFrom(botConfig.getClass()))
 				.map(botConfig -> configType.cast(botConfig)).collect(Collectors.toList());
+	}
+
+	public interface BattleStatsUpdateListener {
+		void onBattleStatsUpdate(BattleStats battleStats);
 	}
 
 }

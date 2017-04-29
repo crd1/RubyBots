@@ -35,7 +35,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>de.crd.rubybots.App</mainClass>
+							<mainClass>de.crd.rubybots.RubyBots</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

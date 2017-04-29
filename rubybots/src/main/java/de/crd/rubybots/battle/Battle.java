@@ -19,7 +19,7 @@ public class Battle {
 	private final UUID uuid = UUID.randomUUID();
 	private final long startTime = System.currentTimeMillis();
 	private final Battlefield battlefield;
-
+	
 	public Battle(int numberOfBots, int numberOfRounds) {
 		this.numberOfBots = numberOfBots;
 		this.numberOfRounds = numberOfRounds;
@@ -40,20 +40,20 @@ public class Battle {
 		return numberOfBots;
 	}
 
-	public void execute() {
+	public void execute(Engine engine) {
 		System.out.println("Begin of battle " + uuid);
 		if (numberOfRounds != null) {
-			executeRoundBasedBattle();
+			executeRoundBasedBattle(engine);
 		} else {
-			executeLastManStanding();
+			executeLastManStanding(engine);
 		}
 		Integer winner = battlefield.getWinner();
 		System.out.println("End of battle " + uuid + ". Winner is: " + ((winner != null) ? winner : "nobody"));
 	}
 
-	private void executeLastManStanding() {
+	private void executeLastManStanding(Engine engine) {
 		while (!battlefield.isOwned()) {
-			callAllBots(battlefield.nextRound());
+			callAllBots(battlefield.nextRound(), engine);
 		}
 	}
 
@@ -61,24 +61,24 @@ public class Battle {
 		return this.battlefield.getBattleStats();
 	}
 
-	private void executeRoundBasedBattle() {
+	private void executeRoundBasedBattle(Engine engine) {
 		do {
 			battlefield.nextRound();
 			if (battlefield.isOwned()) {
 				System.out.println("Battle has already been won. Not executing round " + battlefield.getCurrentRound());
 				break;
 			}
-			callAllBots(battlefield.getCurrentRound());
+			callAllBots(battlefield.getCurrentRound(), engine);
 		} while (battlefield.getCurrentRound() < this.numberOfRounds);
 	}
 
-	private void callAllBots(int round) {
+	private void callAllBots(int round, Engine engine) {
 		System.out.println("--------------------------------------\nCalling all bots for round " + round);
 		List<MoveResult> moveResults = new ArrayList<>();
 		for (int currentBot = 0; currentBot < numberOfBots; currentBot++) {
 			Context context = new Context(currentBot, round, battlefield.toView(currentBot), numberOfBots);
 			try {
-				Engine.callBot(context);// this changes the battlefieldView
+				engine.callBot(context);// this changes the battlefieldView
 			} catch (ScriptException e) {
 				System.out.println(e.getMessage());
 				System.out.println("Script of bot " + currentBot + " contained script error. Skipping bot.");
@@ -88,11 +88,11 @@ public class Battle {
 			moveResults.add(result);
 			System.out.println("Obtained move result: " + result);
 		}
-		applyMoveResults(moveResults);
+		applyMoveResults(moveResults, engine);
 		System.out.println("--------------------------------------\nEnd of round " + round);
 	}
 
-	private void applyMoveResults(List<MoveResult> moveResults) {
+	private void applyMoveResults(List<MoveResult> moveResults, Engine engine) {
 		List<Action> mergedActions = getMergedActionsStableShuffled(moveResults);
 		Map<Integer, Integer> actionsPerBot = new HashMap<>();
 		for (Action action : mergedActions) {
@@ -106,7 +106,7 @@ public class Battle {
 			}
 			actionsPerBot.put(action.getBotNumber(), ++actionsOfThisBot);
 			battlefield.applyAction(action);
-			Engine.getBattleStatsUpdateQueue().offer(battlefield.getBattleStats());
+			engine.getBattleStatsUpdateQueue().offer(battlefield.getBattleStats());
 		}
 	}
 
