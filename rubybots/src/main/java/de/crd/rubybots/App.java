@@ -32,6 +32,7 @@ public class App {
 		Battle battle = getBattle();
 		battle.execute();
 		Engine.shutdown();
+		System.exit(0);
 	}
 
 	private static void setExceptionHandler() {
