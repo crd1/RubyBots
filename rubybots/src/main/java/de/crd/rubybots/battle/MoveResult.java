@@ -5,8 +5,12 @@ import java.util.List;
 
 public class MoveResult {
 
-	private int botNumber = 0;
+	private final int botNumber;
 	private final List<Action> actions = new ArrayList<>();
+
+	public MoveResult(int botNumber) {
+		this.botNumber = botNumber;
+	}
 
 	@Override
 	public String toString() {
@@ -15,10 +19,6 @@ public class MoveResult {
 
 	public int getBotNumber() {
 		return botNumber;
-	}
-
-	public void setBotNumber(int botNumber) {
-		this.botNumber = botNumber;
 	}
 
 	public List<Action> getActions() {

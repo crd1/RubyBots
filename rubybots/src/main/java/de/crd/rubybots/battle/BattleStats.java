@@ -3,14 +3,16 @@ package de.crd.rubybots.battle;
 public class BattleStats {
 
 	private final long timestamp;
+	private final Battlefield battleField;
 
-	public BattleStats(long battleStart) {
+	public BattleStats(long battleStart, Battlefield battleField) {
+		this.battleField = battleField;
 		this.timestamp = System.currentTimeMillis() - battleStart;
 	}
 
 	@Override
 	public String toString() {
-		return "BattleStats [timestamp=" + timestamp + "]";
+		return "BattleStats [timestamp=" + timestamp + ", battleField=" + battleField + "]";
 	}
 
 	@Override
@@ -37,7 +39,7 @@ public class BattleStats {
 
 	public static BattleStats calculateStats(long startTime, Battlefield battlefield) {
 		// TODO
-		return new BattleStats(startTime);
+		return new BattleStats(startTime, new Battlefield(battlefield));
 	}
 
 }

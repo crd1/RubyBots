@@ -3,9 +3,11 @@ package de.crd.rubybots.battle;
 public class Action {
 
 	private final ActionType actionType;
+	private final int botNumber;
 
-	public Action(ActionType actionType) {
+	public Action(int botNumber, ActionType actionType) {
 		this.actionType = actionType;
+		this.botNumber = botNumber;
 	}
 
 	public ActionType getActionType() {
@@ -14,6 +16,10 @@ public class Action {
 
 	public enum ActionType {
 		MOVE;
+	}
+
+	public int getBotNumber() {
+		return botNumber;
 	}
 
 }

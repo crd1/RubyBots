@@ -1,3 +1,5 @@
 puts "I'm bot #{$context.botNumber}"
 puts "I'm gonna destroy you"
-$context.battlefield.move()
+4.times do
+	$context.battlefield.move()
+end

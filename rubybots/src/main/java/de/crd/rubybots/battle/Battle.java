@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import de.crd.rubybots.engine.Engine;
 
@@ -28,6 +29,10 @@ public class Battle {
 
 	public long getStartTime() {
 		return startTime;
+	}
+
+	public int getNumberOfBots() {
+		return numberOfBots;
 	}
 
 	public void execute() {
@@ -62,10 +67,9 @@ public class Battle {
 		System.out.println("--------------------------------------\nCalling all bots for round " + round);
 		List<MoveResult> moveResults = new ArrayList<>();
 		for (int currentBot = 0; currentBot < numberOfBots; currentBot++) {
-			Context context = new Context(currentBot, round, battlefield.toView(), numberOfBots);
+			Context context = new Context(currentBot, round, battlefield.toView(currentBot), numberOfBots);
 			Engine.callBot(context); // this changes the battlefieldView
 			MoveResult result = Battlefield.extractMoveResult(context.getBattlefield());
-			result.setBotNumber(currentBot);
 			moveResults.add(result);
 			System.out.println("Obtained move result: " + result);
 		}
@@ -74,19 +78,21 @@ public class Battle {
 	}
 
 	private void applyMoveResults(List<MoveResult> moveResults) {
-		Collections.shuffle(moveResults);
+		List<Action> mergedActions = moveResults.stream().map(result -> result.getActions())
+				.flatMap(actions -> actions.stream()).collect(Collectors.toList());
+		Collections.shuffle(mergedActions);
 		Map<Integer, Integer> actionsPerBot = new HashMap<>();
-		for (MoveResult result : moveResults) {
-			Integer actionsOfThisBot = actionsPerBot.get(result.getBotNumber());
+		for (Action action : mergedActions) {
+			Integer actionsOfThisBot = actionsPerBot.get(action.getBotNumber());
 			if (actionsOfThisBot == null) {
 				actionsOfThisBot = 0;
 			}
-			if (actionsOfThisBot > MAX_ACTIONS_PER_BOT) {
-				System.out.println("Skipping illegal action of bot " + result.getBotNumber());
+			if (actionsOfThisBot >= MAX_ACTIONS_PER_BOT) {
+				System.out.println("Skipping illegal action of bot " + action.getBotNumber());
 				continue;
 			}
-			actionsPerBot.put(result.getBotNumber(), ++actionsOfThisBot);
-			battlefield.applyMoveResult(result);
+			actionsPerBot.put(action.getBotNumber(), ++actionsOfThisBot);
+			battlefield.applyAction(action);
 			Engine.getBattleStatsUpdateQueue().offer(battlefield.getBattleStats());
 		}
 	}

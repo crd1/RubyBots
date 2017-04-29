@@ -40,7 +40,7 @@ public class Engine {
 		if (jruby == null) {
 			throw new IllegalStateException("JRuby not found.");
 		}
-		jruby.eval("puts \".\"");
+		jruby.eval("puts \".\""); // init engine
 		preparingEngine = false;
 		System.out.println("Done preparing engine.");
 	}
