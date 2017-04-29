@@ -1,6 +1,7 @@
 package de.crd.rubybots;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,9 +114,26 @@ public class RubyBots {
 			if (!argFile.exists()) {
 				throw new IllegalArgumentException("File not found.");
 			}
-			botConfigs.add(new BotFileConfig(argFile));
+			if (!argFile.isDirectory()) {
+				botConfigs.add(new BotFileConfig(argFile));
+			} else {
+				addFromDirectory(argFile, botConfigs);
+			}
 		}
 		return botConfigs;
+	}
+
+	private static void addFromDirectory(File argFile, List<BotConfig> botConfigs) {
+		File[] filesInDirectory = argFile.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File pathname) {
+				return !pathname.isDirectory() && pathname.getName().endsWith(".rb");
+			}
+		});
+		for (File file : filesInDirectory) {
+			botConfigs.add(new BotFileConfig(file));
+		}
 	}
 
 	private boolean init(List<BotConfig> bots) {
