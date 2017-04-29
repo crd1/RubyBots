@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import de.crd.rubybots.battle.Action.ActionType;
@@ -50,8 +51,16 @@ public class Battlefield {
 	 * Sets initial positions for the bots.
 	 */
 	private void initField(final int numberOfBots) {
+		Random random = new Random();
 		for (int i = 0; i < numberOfBots; i++) {
-			field.put(i * Constants.SPACE_PER_BOT, i);
+			int position = random.nextInt(fieldSize);
+			while (field.get(position) != null) {
+				position++;
+				if (position >= fieldSize) {
+					position = 0;
+				}
+			}
+			field.put(position, i);
 		}
 	}
 
