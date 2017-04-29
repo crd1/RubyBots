@@ -1,15 +1,13 @@
 package de.crd.rubybots;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 import javax.script.ScriptException;
 
 import de.crd.rubybots.battle.Battle;
-import de.crd.rubybots.battle.BattleStats;
 import de.crd.rubybots.bots.BotClasspathConfig;
 import de.crd.rubybots.bots.BotConfig;
 import de.crd.rubybots.bots.BotFileConfig;
@@ -19,7 +17,7 @@ public class App {
 
 	private static final List<BotConfig> DEFAULT_BOTS = new ArrayList<>();
 	private static final int DEFAULT_ROUNDS = 3;
-	
+
 	static {
 		DEFAULT_BOTS.add(new BotClasspathConfig("bot.rb"));
 		DEFAULT_BOTS.add(new BotClasspathConfig("bot.rb"));
@@ -27,12 +25,24 @@ public class App {
 
 	public static void main(String[] args) {
 		System.out.println("RubyBots\n\n");
+		setExceptionHandler();
 		if (!init(getBots(args))) {
 			System.exit(-1);
 		}
 		Battle battle = getBattle();
 		battle.execute();
 		Engine.shutdown();
+	}
+
+	private static void setExceptionHandler() {
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		});
 	}
 
 	private static Battle getBattle() {

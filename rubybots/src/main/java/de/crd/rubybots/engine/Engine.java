@@ -69,19 +69,16 @@ public class Engine {
 		return bots.size();
 	}
 
-	public static MoveResult callBot(Context context) {
+	public static void callBot(Context context) {
 		System.out.println("Calling bot " + context.getBotNumber());
-		MoveResult result = new MoveResult();
 		try {
 			Bindings bindings = new SimpleBindings();
 			bindings.put("context", context);
-			bindings.put("result", result);
 			jruby.eval(bots.get(context.getBotNumber()), bindings);
 		} catch (ScriptException e) {
 			throw new IllegalStateException("Scripting failed", e);
 		}
 		System.out.println("Bot call " + context + " returned.");
-		return result;
 	}
 
 	private static void displayBattleStatsUpdate(BattleStats battleStatsUpdate) {

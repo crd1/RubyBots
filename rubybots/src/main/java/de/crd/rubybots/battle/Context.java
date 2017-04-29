@@ -1,16 +1,18 @@
 package de.crd.rubybots.battle;
 
+import de.crd.rubybots.battle.Battlefield.BattlefieldView;
+
 public class Context {
 
 	private final int botNumber;
 	private final int round; // note that this is counted from 1 onwards
-	private final Battlefield battlefield;
+	private final BattlefieldView battlefield;
 	private final int numberOfBots;
 
-	public Context(int botNumber, int round, Battlefield battlefield, int numberOfBots) {
+	public Context(int botNumber, int round, BattlefieldView battlefieldView, int numberOfBots) {
 		this.botNumber = botNumber;
 		this.round = round;
-		this.battlefield = battlefield;
+		this.battlefield = battlefieldView;
 		this.numberOfBots = numberOfBots;
 	}
 
@@ -22,7 +24,7 @@ public class Context {
 		return round;
 	}
 
-	public Battlefield getBattlefield() {
+	public BattlefieldView getBattlefield() {
 		return battlefield;
 	}
 
@@ -32,7 +34,8 @@ public class Context {
 
 	@Override
 	public String toString() {
-		return "Context [botNumber=" + botNumber + ", round=" + round + ", battlefield=" + battlefield + "]";
+		return "Context [botNumber=" + botNumber + ", round=" + round + ", battlefieldView=" + battlefield
+				+ ", numberOfBots=" + numberOfBots + "]";
 	}
 
 }
