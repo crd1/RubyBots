@@ -1,12 +1,24 @@
 package de.crd.rubybots.battle;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import de.crd.rubybots.battle.Action.ActionType;
+
 public class BattleStats {
 
 	private final long timestamp;
 	private final Battlefield battleField;
+	private final Integer winner;
+	private final int rounds;
+	private final int numberOfBots;
 
-	public BattleStats(long battleStart, Battlefield battleField) {
+	public BattleStats(long battleStart, int numberOfBots, Battlefield battleField) {
+		this.numberOfBots = numberOfBots;
 		this.battleField = battleField;
+		this.rounds = battleField.getCurrentRound();
+		this.winner = battleField.getWinner();
 		this.timestamp = System.currentTimeMillis() - battleStart;
 	}
 
@@ -37,9 +49,47 @@ public class BattleStats {
 		return true;
 	}
 
-	public static BattleStats calculateStats(long startTime, Battlefield battlefield) {
-		// TODO
-		return new BattleStats(startTime, new Battlefield(battlefield));
+	public Integer getWinner() {
+		return winner;
+	}
+
+	public int getRounds() {
+		return rounds;
+	}
+
+	public Battlefield getBattlefield() {
+		return battleField;
+	}
+
+	public static BattleStats calculateStats(long startTime, int numberOfBots, Battlefield battlefield) {
+		// TODO further values??
+		return new BattleStats(startTime, numberOfBots, new Battlefield(battlefield));
+	}
+
+	public Map<ActionType, Integer> getSummedUpHistory() {
+		Map<ActionType, Integer> result = new HashMap<>();
+		for (ActionType actionType : ActionType.values()) {
+			result.put(actionType, 0);
+		}
+		for (Entry<Integer, Map<ActionType, Integer>> allHistory : battleField.getHistory().entrySet()) {
+			for (Entry<ActionType, Integer> singleBotHistoryEntry : allHistory.getValue().entrySet()) {
+				result.put(singleBotHistoryEntry.getKey(),
+						result.get(singleBotHistoryEntry.getKey()) + singleBotHistoryEntry.getValue());
+			}
+		}
+		return result;
+	}
+
+	public Map<Integer, Map<ActionType, Integer>> getHistory() {
+		return battleField.getHistory();
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public int getNumberOfBots() {
+		return numberOfBots;
 	}
 
 }

@@ -1,5 +1,5 @@
 2.times do
-#	$context.battlefield.move()
+	$context.battlefield.move()
 end
 target=rand($context.battlefield.size)
 detectedBot=$context.battlefield.whoIsAtPosition(target)

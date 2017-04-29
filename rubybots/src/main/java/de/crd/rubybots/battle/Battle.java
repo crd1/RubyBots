@@ -53,6 +53,10 @@ public class Battle {
 		}
 	}
 
+	public BattleStats getCurrentBattleStats() {
+		return this.battlefield.getBattleStats();
+	}
+
 	private void executeRoundBasedBattle() {
 		do {
 			battlefield.nextRound();

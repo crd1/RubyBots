@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.script.ScriptException;
 
 import de.crd.rubybots.battle.Battle;
+import de.crd.rubybots.battle.BattleStats;
 import de.crd.rubybots.bots.BotClasspathConfig;
 import de.crd.rubybots.bots.BotConfig;
 import de.crd.rubybots.bots.BotFileConfig;
@@ -32,7 +33,25 @@ public class App {
 		Battle battle = getBattle();
 		battle.execute();
 		Engine.shutdown();
+		try {
+			Thread.sleep(1000L);
+		} catch (InterruptedException e) {
+		}
+		printFinalStats(battle);
 		System.exit(0);
+	}
+
+	private static void printFinalStats(Battle battle) {
+		BattleStats finalStats = battle.getCurrentBattleStats();
+		System.out.println("\n\n***************************");
+		System.out.println("Time passed: " + finalStats.getTimestamp() + " ms.");
+		System.out.println("Number of bots: " + finalStats.getNumberOfBots());
+		System.out.println("Winner: " + (finalStats.getWinner() != null ? "Bot " + finalStats.getWinner() : "Nobody"));
+		System.out.println("Rounds: " + finalStats.getRounds());
+		System.out.println("History: " + finalStats.getHistory());
+		System.out.println("Summed up history: " + finalStats.getSummedUpHistory());
+		System.out.println("Final Battlefield: " + finalStats.getBattlefield());
+		System.out.println("***************************");
 	}
 
 	private static void setExceptionHandler() {

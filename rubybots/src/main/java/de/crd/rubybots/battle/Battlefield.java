@@ -15,6 +15,7 @@ public class Battlefield {
 	private final Battle parentBattle;
 	private int currentRound;
 	private final Map<Integer, Integer> field;
+	private final Map<Integer, Map<ActionType, Integer>> history = new HashMap<>();
 	private final int fieldSize;
 
 	public Battlefield(Battle parentBattle) {
@@ -22,13 +23,23 @@ public class Battlefield {
 		this.parentBattle = parentBattle;
 		this.fieldSize = getFieldSize(parentBattle.getNumberOfBots());
 		initField(parentBattle.getNumberOfBots());
+		this.initHistory(parentBattle.getNumberOfBots());
 	}
 
 	public Battlefield(Battlefield toCopy) {
 		this.parentBattle = toCopy.parentBattle;
 		this.currentRound = toCopy.currentRound;
 		this.field = new HashMap<>(toCopy.field);
+		for (Entry<Integer, Map<ActionType, Integer>> entry : toCopy.history.entrySet()) {
+			this.history.put(entry.getKey(), new HashMap<>(entry.getValue()));
+		}
 		this.fieldSize = toCopy.fieldSize;
+	}
+
+	private void initHistory(int numberOfBots) {
+		for (int i = 0; i < numberOfBots; i++) {
+			history.put(i, new HashMap<>());
+		}
 	}
 
 	private int getFieldSize(int numberOfBots) {
@@ -74,6 +85,11 @@ public class Battlefield {
 			System.out.println("Unhandled action: " + action.getActionType());
 			break;
 		}
+		Integer thisBotsActionsBefore = history.get(action.getBotNumber()).get(action.getActionType());
+		if (thisBotsActionsBefore == null) {
+			thisBotsActionsBefore = 0;
+		}
+		history.get(action.getBotNumber()).put(action.getActionType(), thisBotsActionsBefore + 1);
 	}
 
 	private void move(int botNumber, int currentPosition) {
@@ -154,8 +170,12 @@ public class Battlefield {
 		return getWinner() != null;
 	}
 
+	public Map<Integer, Map<ActionType, Integer>> getHistory() {
+		return history;
+	}
+
 	public BattleStats getBattleStats() {
-		return BattleStats.calculateStats(parentBattle.getStartTime(), this);
+		return BattleStats.calculateStats(parentBattle.getStartTime(), parentBattle.getNumberOfBots(), this);
 	}
 
 	public static class BattlefieldView {
