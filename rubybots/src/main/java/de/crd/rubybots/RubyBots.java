@@ -36,7 +36,7 @@ public class RubyBots {
 		List<BotConfig> botConfig = getBotsFromArgs(args);
 		RubyBots rubyBots = new RubyBots(getDefaultBattleStatsUpdateListener(), botConfig);
 		Battle battle = null;
-		if ((battle = rubyBots.startBattle(DEFAULT_ROUNDS)) == null) {
+		if ((battle = rubyBots.startBattle(null)) == null) {
 			System.exit(-1);
 		}
 		rubyBots.shutdown();
