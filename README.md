@@ -3,13 +3,16 @@ This is an engine that enables ruby programs to compete. The concept is similar 
 
 ## Building
 Build the engine: `mvn clean compile assembly:single`
+
 Run the engine in demo mode: `java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 ## Usage
 A bot is any valid ruby program. To choose bots simply pass them as arguments to the engine:
 `java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar bot1 bot2 bot3`
+
 You can also name a directory:
 `java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar botDirectory`
+
 This will just add files that match the pattern `*.rb` and will *not* proceed recursively.
 
 ## Writing Bots
@@ -18,6 +21,8 @@ Bots can use the RubyBot API. At execution time there will be an object `$contex
 + round // the current round
 + numberOfBots // the total number of bots competing
 + battlefield // An object representing the battlefield at the time the round started
+
+Also you can call log(message) on this object. This is explicitly encouraged.
 
 On the Battlefield object you can call:
 + getSize() // returns the battlefield's size
@@ -36,6 +41,6 @@ On the Battlefield object you can call:
 
 ## Warning
 The bots' code will be executed as-is. This implies that bots are able to delete files on your hard disk, for example.
-In a future version there will be a ruleset for the Java Security Manager that can be used. At the moment, enabling Java Security disabled bot execution which renders this engine kind of pointless.
+In a future version there will be a ruleset for the Java Security Manager that can be used. At the moment, enabling Java Security disables bot execution which renders this engine kind of pointless.
 
 # Have fun!
