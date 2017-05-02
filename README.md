@@ -4,14 +4,14 @@ This is an engine that enables ruby programs to compete. The concept is similar 
 ## Building
 Build the engine: `mvn clean compile assembly:single`
 
-Run the engine in demo mode: `java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
+Run the engine in demo mode: `java -jar target/rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 ## Usage
 A bot is any valid ruby program. To choose bots simply pass them as arguments to the engine:
-`java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar bot1.rb bot2.rb bot3.rb`
+`java -jar target/rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar bot1.rb bot2.rb bot3.rb`
 
 You can also name a directory:
-`java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar botDirectory`
+`java -jar target/rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar botDirectory`
 
 This will just add files that match the pattern `*.rb` and will *not* proceed recursively.
 
@@ -41,6 +41,6 @@ On the Battlefield object (`$context.battlefield`) you can call:
 
 ## Warning
 The bots' code will be executed as-is. This implies that bots are able to delete files on your hard disk, for example.
-In a future version there will be a ruleset for the Java Security Manager that can be used. At the moment, enabling Java Security disables bot execution which renders this engine kind of pointless.
+In a future version there will be a ruleset for the Java Security Manager that can be used. At the moment, enabling Java Security (via `-Djava.security.manager`) disables bot execution which renders this engine kind of pointless.
 
 # Have fun!
