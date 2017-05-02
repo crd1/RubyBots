@@ -22,9 +22,9 @@ Bots can use the RubyBot API. At execution time there will be an object `$contex
 + numberOfBots // the total number of bots competing
 + battlefield // An object representing the battlefield at the time the round started
 
-Also you can call log(message) on this object. This is explicitly encouraged.
+You can also call log(message) on this object. This is explicitly encouraged.
 
-On the Battlefield object you can call:
+On the Battlefield object (`$context.battlefield`) you can call:
 + getSize() // returns the battlefield's size
 + getMyPosition() // returns your bot's position *at the time the round started*
 + whoIsAtPosition(position) // returns the id of the bot that was at the given position when the round started or nil
