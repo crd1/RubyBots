@@ -8,7 +8,7 @@ Run the engine in demo mode: `java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-
 
 ## Usage
 A bot is any valid ruby program. To choose bots simply pass them as arguments to the engine:
-`java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar bot1 bot2 bot3`
+`java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar bot1.rb bot2.rb bot3.rb`
 
 You can also name a directory:
 `java -jar target\rubybots-0.0.1-SNAPSHOT-jar-with-dependencies.jar botDirectory`
