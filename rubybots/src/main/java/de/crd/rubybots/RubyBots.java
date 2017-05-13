@@ -2,6 +2,7 @@ package de.crd.rubybots;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,9 @@ public class RubyBots {
 		DEFAULT_BOTS.add(new BotClasspathConfig("hunted.rb"));
 	}
 
-	public static void main(String[] args) {
-		System.out.println("\n\n\n*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
+	public static void main(String[] args) throws IOException {
+		System.out.println(
+				"\n\n\n*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
 		setExceptionHandler();
 		List<BotConfig> botConfig = getBotsFromArgs(args);
 		RubyBots rubyBots = new RubyBots(getDefaultBattleStatsUpdateListener(), botConfig);
@@ -76,7 +78,7 @@ public class RubyBots {
 	 * API ENTRY POINT
 	 */
 	public Battle startBattle(Integer numberOfRounds) {
-		if (!init(botConfigs)) {
+		if (!init()) {
 			return null;
 		}
 		Battle battle = new Battle(numberOfRounds, botConfigs);
@@ -137,14 +139,14 @@ public class RubyBots {
 		}
 	}
 
-	private boolean init(List<BotConfig> bots) {
+	private boolean init() {
 		if (initialized) {
 			return true;
 		}
 		try {
 			mEngine.prepareEngine();
-			mEngine.loadBotsFromClasspath(getConfigsOfType(bots, BotClasspathConfig.class));
-			mEngine.loadBotsFromFiles(getConfigsOfType(bots, BotFileConfig.class));
+			mEngine.loadBotsFromClasspath(getConfigsOfType(botConfigs, BotClasspathConfig.class));
+			mEngine.loadBotsFromFiles(getConfigsOfType(botConfigs, BotFileConfig.class));
 		} catch (ScriptException | IllegalStateException e) {
 			System.out.println("RubyBots could not be initialized: " + e.getMessage());
 			return false;

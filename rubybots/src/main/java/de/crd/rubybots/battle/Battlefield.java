@@ -138,13 +138,15 @@ public class Battlefield {
 	private void fire(int botNumber, int targetPosition) {
 		if (targetPosition >= 0 && targetPosition < fieldSize) {
 			Integer firedAt = field.get(targetPosition);
-			if (firedAt == null || firedAt == Constants.MINE_REPRESENTATION) {
+			if (firedAt == null) {
 				return;
 			}
 			field.remove(targetPosition);
 			if (firedAt == botNumber) {
 				LOGGER.log(Level.FINE, "Bot " + botNumber + " commited suicide.");
-			} else if (firedAt != botNumber) {
+			} else if (firedAt == Constants.MINE_REPRESENTATION) {
+				LOGGER.log(Level.FINE, "Bot " + botNumber + " destroyed a mine.");
+			} else {
 				LOGGER.log(Level.FINE, "Bot " + botNumber + " destroyed bot " + firedAt);
 			}
 		} else {
@@ -207,7 +209,8 @@ public class Battlefield {
 	}
 
 	/**
-	 * Determines whether this battle has already been won by some bot or has ended.
+	 * Determines whether this battle has already been won by some bot or has
+	 * ended.
 	 * 
 	 */
 	public boolean isOwned() {
