@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.script.ScriptException;
@@ -19,6 +21,7 @@ import de.crd.rubybots.engine.Engine;
 
 public class RubyBots {
 
+	private static final Logger LOGGER = Logger.getLogger(RubyBots.class.getSimpleName());
 	private static final List<BotConfig> DEFAULT_BOTS = new ArrayList<>();
 	private static final int DEFAULT_ROUNDS = 5;
 
@@ -27,8 +30,9 @@ public class RubyBots {
 	private boolean initialized;
 
 	static {
-		DEFAULT_BOTS.add(new BotClasspathConfig("hunter.rb"));
-		DEFAULT_BOTS.add(new BotClasspathConfig("hunted.rb"));
+		// honor the simple minds
+		DEFAULT_BOTS.add(new BotClasspathConfig("hunter.rb")); // the hunter...
+		DEFAULT_BOTS.add(new BotClasspathConfig("hunted.rb")); // ...and the hunted
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -148,7 +152,7 @@ public class RubyBots {
 			mEngine.loadBotsFromClasspath(getConfigsOfType(botConfigs, BotClasspathConfig.class));
 			mEngine.loadBotsFromFiles(getConfigsOfType(botConfigs, BotFileConfig.class));
 		} catch (ScriptException | IllegalStateException e) {
-			System.out.println("RubyBots could not be initialized: " + e.getMessage());
+			LOGGER.log(Level.SEVERE, "RubyBots could not be initialized: " + e.getMessage());
 			return false;
 		}
 		initialized = true;
