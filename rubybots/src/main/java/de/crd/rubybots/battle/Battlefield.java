@@ -127,7 +127,7 @@ public class Battlefield {
 		}
 		// move the bot
 		field.put(currentPosition, null);
-		if (field.get(nextFree) != Constants.MINE_REPRESENTATION) {
+		if (field.get(nextFree) == null || field.get(nextFree) != Constants.MINE_REPRESENTATION) {
 			field.put(nextFree, botNumber);
 		} else {
 			LOGGER.log(Level.FINE, "Bot " + botNumber + " stepped on a mine.");
