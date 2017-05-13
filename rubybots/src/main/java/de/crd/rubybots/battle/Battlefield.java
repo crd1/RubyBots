@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.crd.rubybots.battle.Action.ActionType;
@@ -13,6 +15,7 @@ import de.crd.rubybots.config.Constants;
 
 public class Battlefield {
 
+	private static final Logger LOGGER = Logger.getLogger(Battlefield.class.getSimpleName());
 	private final Battle parentBattle;
 	private int currentRound;
 	private final Map<Integer, Integer> field;
@@ -83,10 +86,10 @@ public class Battlefield {
 	public void applyAction(Action action) {
 		Integer currentPositionOfBot = getPosition(action.getBotNumber());
 		if (currentPositionOfBot == null) {
-			System.out.println("Bot has already been destroyed. Skipping action for bot " + action.getBotNumber());
+			LOGGER.log(Level.FINE, "Bot has already been destroyed. Skipping action for bot " + action.getBotNumber());
 			return;
 		}
-		System.out.println("Applying action " + action.getActionType() + " for bot " + action.getBotNumber());
+		LOGGER.log(Level.FINE, "Applying action " + action.getActionType() + " for bot " + action.getBotNumber());
 		switch (action.getActionType()) {
 		case MOVE:
 			move(action.getBotNumber(), currentPositionOfBot);
@@ -98,7 +101,7 @@ public class Battlefield {
 			mine(action.getBotNumber(), action.getTargetPosition());
 			break;
 		default:
-			System.out.println("Unhandled action: " + action.getActionType());
+			LOGGER.log(Level.SEVERE, "Unhandled action: " + action.getActionType());
 			break;
 		}
 		Integer thisBotsActionsBefore = history.get(action.getBotNumber()).get(action.getActionType());
@@ -112,14 +115,14 @@ public class Battlefield {
 		if (field.get(targetPosition) == null) {
 			field.put(targetPosition, Constants.MINE_REPRESENTATION);
 		} else {
-			System.out.println("Mining positions that are taken not possible. Skipping SET_MINE.");
+			LOGGER.log(Level.FINE, "Mining positions that are taken not possible. Skipping SET_MINE.");
 		}
 	}
 
 	private void move(int botNumber, int currentPosition) {
 		Integer nextFree = getNextFreePosition(currentPosition, true);
 		if (nextFree == null) {
-			System.out.println("No position to move to. Skipping MOVE.");
+			LOGGER.log(Level.FINE, "No position to move to. Skipping MOVE.");
 			return;
 		}
 		// move the bot
@@ -127,7 +130,7 @@ public class Battlefield {
 		if (field.get(nextFree) != Constants.MINE_REPRESENTATION) {
 			field.put(nextFree, botNumber);
 		} else {
-			System.out.println("Bot " + botNumber + " stepped on a mine.");
+			LOGGER.log(Level.FINE, "Bot " + botNumber + " stepped on a mine.");
 			field.put(nextFree, null);
 		}
 	}
@@ -140,12 +143,12 @@ public class Battlefield {
 			}
 			field.remove(targetPosition);
 			if (firedAt == botNumber) {
-				System.out.println("Bot " + botNumber + " commited suicide.");
+				LOGGER.log(Level.FINE, "Bot " + botNumber + " commited suicide.");
 			} else if (firedAt != botNumber) {
-				System.out.println("Bot " + botNumber + " destroyed bot " + firedAt);
+				LOGGER.log(Level.FINE, "Bot " + botNumber + " destroyed bot " + firedAt);
 			}
 		} else {
-			System.out.println("Bot " + botNumber + " fired outside of field.");
+			LOGGER.log(Level.FINE, "Bot " + botNumber + " fired outside of field.");
 		}
 	}
 
@@ -188,7 +191,7 @@ public class Battlefield {
 		return "Battlefield [currentRound=" + currentRound + ", field=" + getFieldRepresentation() + "]";
 	}
 
-	private String getFieldRepresentation() {
+	public String getFieldRepresentation() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < fieldSize; i++) {
 			Integer botOnField = field.get(i);
@@ -204,11 +207,11 @@ public class Battlefield {
 	}
 
 	/**
-	 * Determines whether this battle has already been won by some bot.
+	 * Determines whether this battle has already been won by some bot or has ended.
 	 * 
 	 */
 	public boolean isOwned() {
-		return getWinner() != null;
+		return getNumberOfMenStanding() == 0 || getWinner() != null;
 	}
 
 	public Map<Integer, Map<ActionType, Integer>> getHistory() {
@@ -267,12 +270,18 @@ public class Battlefield {
 
 	}
 
+	public Integer getNumberOfMenStanding() {
+		List<Integer> menStanding = field.values().stream()
+				.filter(bot -> (bot != null && bot != Constants.MINE_REPRESENTATION)).collect(Collectors.toList());
+		return menStanding.size();
+	}
+
 	public Integer getWinner() {
 		List<Integer> menStanding = field.values().stream()
 				.filter(bot -> (bot != null && bot != Constants.MINE_REPRESENTATION)).collect(Collectors.toList());
 		Collections.sort(menStanding);
 		if (menStanding.size() != 1) {
-			// System.out.println("No winner. Men standing are: " +
+			// LOGGER.log(Level.FINE, "No winner. Men standing are: " +
 			// menStanding);
 			return null;
 		}

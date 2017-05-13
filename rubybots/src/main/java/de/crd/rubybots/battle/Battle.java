@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.script.ScriptException;
@@ -16,6 +18,8 @@ import de.crd.rubybots.config.Constants;
 import de.crd.rubybots.engine.Engine;
 
 public class Battle {
+	private static final Logger LOGGER = Logger.getLogger(Battle.class.getSimpleName());
+	private static final long TIME_BETWEEN_ROUNDS = 1000L;
 	private final List<BotConfig> botConfigs;
 	private final Integer numberOfRounds;
 	private final UUID uuid = UUID.randomUUID();
@@ -44,19 +48,20 @@ public class Battle {
 	 * NON-API
 	 */
 	public void execute(Engine engine) {
-		System.out.println("Begin of battle " + uuid);
+		LOGGER.log(Level.FINE, "Begin of battle " + uuid);
 		if (numberOfRounds != null) {
 			executeRoundBasedBattle(engine);
 		} else {
 			executeLastManStanding(engine);
 		}
 		Integer winner = battlefield.getWinner();
-		System.out.println("End of battle " + uuid + ". Winner is: " + ((winner != null) ? winner : "nobody"));
+		LOGGER.log(Level.FINE, "End of battle " + uuid + ". Winner is: " + ((winner != null) ? winner : "nobody"));
 	}
 
 	private void executeLastManStanding(Engine engine) {
 		while (!battlefield.isOwned()) {
 			callAllBots(battlefield.nextRound(), engine);
+			sleepBetweenRounds();
 		}
 	}
 
@@ -67,33 +72,42 @@ public class Battle {
 	private void executeRoundBasedBattle(Engine engine) {
 		do {
 			if (battlefield.isOwned()) {
-				System.out.println(
+				LOGGER.log(Level.FINE,
 						"Battle has already been won. Not executing round " + (battlefield.getCurrentRound() + 1));
 				break;
 			}
 			battlefield.nextRound();
 			callAllBots(battlefield.getCurrentRound(), engine);
+			sleepBetweenRounds();
 		} while (battlefield.getCurrentRound() < this.numberOfRounds);
 	}
 
+	private void sleepBetweenRounds() {
+		try {
+			Thread.sleep(TIME_BETWEEN_ROUNDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
 	private void callAllBots(int round, Engine engine) {
-		System.out.println("--------------------------------------\nCalling all bots for round " + round);
+		LOGGER.log(Level.FINE, "--------------------------------------\nCalling all bots for round " + round);
 		List<MoveResult> moveResults = new ArrayList<>();
 		for (int currentBot = 0; currentBot < getNumberOfBots(); currentBot++) {
 			Context context = new Context(currentBot, round, battlefield.toView(currentBot), getNumberOfBots());
 			try {
 				engine.callBot(context);// this changes the battlefieldView
 			} catch (ScriptException e) {
-				System.out.println(e.getMessage());
-				System.out.println("Script of bot " + currentBot + " contained script error. Skipping bot.");
+				LOGGER.log(Level.FINE, e.getMessage());
+				LOGGER.log(Level.SEVERE, "Script of bot " + currentBot + " contained script error. Skipping bot.");
 				continue;
 			}
 			MoveResult result = Battlefield.extractMoveResult(context.getBattlefield());
 			moveResults.add(result);
-			System.out.println("Obtained move result: " + result);
+			LOGGER.log(Level.FINE, "Obtained move result: " + result);
 		}
 		applyMoveResults(moveResults, engine);
-		System.out.println("--------------------------------------\nEnd of round " + round);
+		LOGGER.log(Level.FINE, "--------------------------------------\nEnd of round " + round);
 	}
 
 	private void applyMoveResults(List<MoveResult> moveResults, Engine engine) {
@@ -105,7 +119,7 @@ public class Battle {
 				actionsOfThisBot = 0;
 			}
 			if (actionsOfThisBot >= Constants.MAX_ACTIONS_PER_BOT) {
-				System.out.println("Skipping illegal action of bot " + action.getBotNumber());
+				LOGGER.log(Level.FINE, "Skipping illegal action of bot " + action.getBotNumber());
 				continue;
 			}
 			actionsPerBot.put(action.getBotNumber(), ++actionsOfThisBot);

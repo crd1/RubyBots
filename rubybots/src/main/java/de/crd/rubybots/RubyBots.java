@@ -31,7 +31,7 @@ public class RubyBots {
 	}
 
 	public static void main(String[] args) {
-		System.out.println("*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
+		System.out.println("\n\n\n*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
 		setExceptionHandler();
 		List<BotConfig> botConfig = getBotsFromArgs(args);
 		RubyBots rubyBots = new RubyBots(getDefaultBattleStatsUpdateListener(), botConfig);
@@ -59,7 +59,8 @@ public class RubyBots {
 	}
 
 	private static void displayBattleStatsUpdate(BattleStats battleStatsUpdate) {
-		System.out.println("New BattleStats: " + battleStatsUpdate);
+		System.out.print("\rround: " + battleStatsUpdate.getBattlefield().getCurrentRound() + " | "
+				+ battleStatsUpdate.getBattlefield().getFieldRepresentation());
 	}
 
 	public RubyBots(BattleStatsUpdateListener listener, List<BotConfig> botConfigs) {

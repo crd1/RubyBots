@@ -1,9 +1,13 @@
 package de.crd.rubybots.battle;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import de.crd.rubybots.battle.Battlefield.BattlefieldView;
 
 public class Context {
 
+	private static final Logger LOGGER = Logger.getLogger(Context.class.getSimpleName());
 	private final int botNumber;
 	private final int round; // note that this is counted from 1 onwards
 	private final BattlefieldView battlefield;
@@ -33,7 +37,7 @@ public class Context {
 	}
 
 	public void log(String log) {
-		System.out.println("Bot " + botNumber + ": " + log);
+		LOGGER.log(Level.FINE, "Bot " + botNumber + ": " + log);
 	}
 
 	@Override

@@ -10,6 +10,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.script.Bindings;
@@ -26,7 +28,7 @@ import de.crd.rubybots.bots.BotClasspathConfig;
 import de.crd.rubybots.bots.BotFileConfig;
 
 public class Engine {
-
+	private static final Logger LOGGER = Logger.getLogger(Engine.class.getSimpleName());
 	private volatile ScriptEngine jruby;
 	private final List<String> bots = new ArrayList<>();
 	private final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
@@ -48,26 +50,26 @@ public class Engine {
 		}
 		jruby.eval("puts \".\""); // init engine
 		preparingEngine = false;
-		System.out.println("Done preparing engine.");
+		LOGGER.log(Level.FINE, "Done preparing engine.");
 	}
 
 	public void loadBotsFromClasspath(List<BotClasspathConfig> botConfigs) {
-		System.out.println("Loading bots from classpath.");
+		LOGGER.log(Level.FINE, "Loading bots from classpath.");
 		int i = getNumberOfBots();
 		for (BotClasspathConfig botConfig : botConfigs) {
-			System.out.println("Loading bot nr " + i + " from " + botConfig);
+			LOGGER.log(Level.FINE, "Loading bot nr " + i + " from " + botConfig);
 			try (InputStreamReader isr = new InputStreamReader(
 					RubyBots.class.getResourceAsStream("/" + botConfig.getClasspathReference()));
 					BufferedReader br = new BufferedReader(isr);) {
 				String bot = br.lines().collect(Collectors.joining(System.getProperty("line.separator")));
-				System.out.println("Found bot:\n" + bot);
+				LOGGER.log(Level.FINE, "Found bot:\n" + bot);
 				bots.add(bot);
 			} catch (Exception e) {
 				throw new IllegalStateException("Loading bot from classpath failed.");
 			}
 			i++;
 		}
-		System.out.println("Done loading bots from classpath.");
+		LOGGER.log(Level.FINE, "Done loading bots from classpath.");
 	}
 
 	public int getNumberOfBots() {
@@ -75,11 +77,11 @@ public class Engine {
 	}
 
 	public void callBot(Context context) throws ScriptException {
-		System.out.println("Calling bot " + context.getBotNumber());
+		LOGGER.log(Level.FINE, "Calling bot " + context.getBotNumber());
 		Bindings bindings = new SimpleBindings();
 		bindings.put("context", context);
 		jruby.eval(bots.get(context.getBotNumber()), bindings);
-		System.out.println("Bot call " + context + " returned.");
+		LOGGER.log(Level.FINE, "Bot call " + context + " returned.");
 	}
 
 	private class ProgressTask implements Runnable {
@@ -93,6 +95,7 @@ public class Engine {
 				} catch (InterruptedException e) {
 				}
 			}
+			System.out.println("\n\n");
 			// engine prepared, start showing battleStats
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
@@ -106,27 +109,27 @@ public class Engine {
 	}
 
 	public void shutdown() {
-		System.out.println("Shutting down engine.");
+		LOGGER.log(Level.FINE, "Shutting down engine.");
 		backgroundExecutor.shutdownNow();
 	}
 
 	public void loadBotsFromFiles(List<BotFileConfig> botConfigs) {
-		System.out.println("Loading bots from files.");
+		LOGGER.log(Level.FINE, "Loading bots from files.");
 		int i = getNumberOfBots();
 		for (BotFileConfig botConfig : botConfigs) {
-			System.out.println("Loading bot nr " + i + " from " + botConfig);
+			LOGGER.log(Level.FINE, "Loading bot nr " + i + " from " + botConfig);
 			try (FileInputStream fis = new FileInputStream(botConfig.getBotFile());
 					InputStreamReader isr = new InputStreamReader(fis);
 					BufferedReader br = new BufferedReader(isr);) {
 				String bot = br.lines().collect(Collectors.joining(System.getProperty("line.separator")));
-				System.out.println("Found bot:\n" + bot);
+				LOGGER.log(Level.FINE, "Found bot:\n" + bot);
 				bots.add(bot);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			i++;
 		}
-		System.out.println("Done loading bots from files.");
+		LOGGER.log(Level.FINE, "Done loading bots from files.");
 	}
 
 	public Queue<BattleStats> getBattleStatsUpdateQueue() {
