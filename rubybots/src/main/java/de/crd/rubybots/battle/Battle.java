@@ -20,7 +20,7 @@ import de.crd.rubybots.engine.Engine;
 public class Battle {
 	private static final Logger LOGGER = Logger.getLogger(Battle.class.getSimpleName());
 	private static final long TIME_BETWEEN_ROUNDS = 1000L;
-	private final List<BotConfig> botConfigs;
+	private final List<Bot> bots;
 	private final Integer numberOfRounds;
 	private final UUID uuid = UUID.randomUUID();
 	private final long startTime = System.currentTimeMillis();
@@ -28,8 +28,16 @@ public class Battle {
 
 	public Battle(Integer numberOfRounds, List<BotConfig> botConfigs) {
 		this.numberOfRounds = numberOfRounds;
-		this.botConfigs = Collections.unmodifiableList(botConfigs);
+		this.bots = getBots(botConfigs);
 		this.battlefield = new Battlefield(this);
+	}
+
+	private List<Bot> getBots(List<BotConfig> botConfigs) {
+		List<Bot> bots = new ArrayList<>();
+		for (int i = 0; i < botConfigs.size(); i++) {
+			bots.add(new Bot(i, botConfigs.get(i)));
+		}
+		return Collections.unmodifiableList(bots);
 	}
 
 	public Battle(List<BotConfig> botConfigs) {
@@ -41,7 +49,7 @@ public class Battle {
 	}
 
 	public int getNumberOfBots() {
-		return botConfigs.size();
+		return bots.size();
 	}
 
 	/**
@@ -54,7 +62,7 @@ public class Battle {
 		} else {
 			executeLastManStanding(engine);
 		}
-		Integer winner = battlefield.getWinner();
+		Bot winner = battlefield.getWinner();
 		LOGGER.log(Level.FINE, "End of battle " + uuid + ". Winner is: " + ((winner != null) ? winner : "nobody"));
 	}
 
@@ -148,7 +156,11 @@ public class Battle {
 		return mergedActions;
 	}
 
-	public List<BotConfig> getBotConfigs() {
-		return botConfigs;
+	public List<Bot> getBots() {
+		return bots;
+	}
+
+	public Bot getBot(int i) {
+		return bots.get(i);
 	}
 }

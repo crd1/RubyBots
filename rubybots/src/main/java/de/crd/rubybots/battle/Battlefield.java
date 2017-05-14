@@ -18,7 +18,7 @@ public class Battlefield {
 	private static final Logger LOGGER = Logger.getLogger(Battlefield.class.getSimpleName());
 	private final Battle parentBattle;
 	private int currentRound;
-	private final Map<Integer, Integer> field;
+	private final Map<Integer, BattlefieldEntity> field;
 	private final Map<Integer, Map<ActionType, Integer>> history = new HashMap<>();
 	private final int fieldSize;
 
@@ -63,7 +63,7 @@ public class Battlefield {
 					position = 0;
 				}
 			}
-			field.put(position, i);
+			field.put(position, parentBattle.getBot(i));
 		}
 	}
 
@@ -113,7 +113,7 @@ public class Battlefield {
 
 	private void mine(int botNumber, Integer targetPosition) {
 		if (field.get(targetPosition) == null) {
-			field.put(targetPosition, Constants.MINE_REPRESENTATION);
+			field.put(targetPosition, new Mine());
 		} else {
 			LOGGER.log(Level.FINE, "Mining positions that are taken not possible. Skipping SET_MINE.");
 		}
@@ -127,8 +127,8 @@ public class Battlefield {
 		}
 		// move the bot
 		field.put(currentPosition, null);
-		if (field.get(nextFree) == null || field.get(nextFree) != Constants.MINE_REPRESENTATION) {
-			field.put(nextFree, botNumber);
+		if (field.get(nextFree) == null || field.get(nextFree) instanceof Mine) {
+			field.put(nextFree, parentBattle.getBot(botNumber));
 		} else {
 			LOGGER.log(Level.FINE, "Bot " + botNumber + " stepped on a mine.");
 			field.put(nextFree, null);
@@ -137,14 +137,14 @@ public class Battlefield {
 
 	private void fire(int botNumber, int targetPosition) {
 		if (targetPosition >= 0 && targetPosition < fieldSize) {
-			Integer firedAt = field.get(targetPosition);
+			BattlefieldEntity firedAt = field.get(targetPosition);
 			if (firedAt == null) {
 				return;
 			}
 			field.remove(targetPosition);
-			if (firedAt == botNumber) {
+			if (firedAt instanceof Bot && ((Bot) firedAt).getBotNumber() == botNumber) {
 				LOGGER.log(Level.FINE, "Bot " + botNumber + " commited suicide.");
-			} else if (firedAt == Constants.MINE_REPRESENTATION) {
+			} else if (firedAt instanceof Mine) {
 				LOGGER.log(Level.FINE, "Bot " + botNumber + " destroyed a mine.");
 			} else {
 				LOGGER.log(Level.FINE, "Bot " + botNumber + " destroyed bot " + firedAt);
@@ -164,7 +164,7 @@ public class Battlefield {
 			if (field.get(i) == null) {
 				return i;
 			}
-			if (includeMined && field.get(i) == Constants.MINE_REPRESENTATION) {
+			if (includeMined && field.get(i) instanceof Mine) {
 				return i;
 			}
 		}
@@ -172,8 +172,8 @@ public class Battlefield {
 	}
 
 	private Integer getPosition(int botNumber) {
-		for (Entry<Integer, Integer> entry : field.entrySet()) {
-			if (Integer.valueOf(botNumber).equals(entry.getValue())) {
+		for (Entry<Integer, BattlefieldEntity> entry : field.entrySet()) {
+			if (entry.getValue() instanceof Bot && ((Bot) entry.getValue()).getBotNumber() == botNumber) {
 				return entry.getKey();
 			}
 		}
@@ -196,13 +196,13 @@ public class Battlefield {
 	public String getFieldRepresentation() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < fieldSize; i++) {
-			Integer botOnField = field.get(i);
-			if (botOnField == null) {
+			BattlefieldEntity entityOnField = field.get(i);
+			if (entityOnField == null) {
 				sb.append("-");
-			} else if (botOnField == Constants.MINE_REPRESENTATION) {
+			} else if (entityOnField instanceof Mine) {
 				sb.append("#");
 			} else {
-				sb.append(botOnField);
+				sb.append(((Bot) entityOnField).getBotNumber());
 			}
 		}
 		return sb.toString();
@@ -228,9 +228,9 @@ public class Battlefield {
 	public static class BattlefieldView {
 		private final MoveResult moveResult;
 		private final int size;
-		private final Map<Integer, Integer> _field;
+		private final Map<Integer, BattlefieldEntity> _field;
 
-		public BattlefieldView(int botNumber, int battlefieldSize, Map<Integer, Integer> field) {
+		public BattlefieldView(int botNumber, int battlefieldSize, Map<Integer, BattlefieldEntity> field) {
 			this.size = battlefieldSize;
 			this.moveResult = new MoveResult(botNumber);
 			this._field = new HashMap<>(field);
@@ -254,8 +254,9 @@ public class Battlefield {
 		}
 
 		public Integer getMyPosition() {
-			for (Entry<Integer, Integer> entry : _field.entrySet()) {
-				if (Integer.valueOf(moveResult.getBotNumber()).equals(entry.getValue())) {
+			for (Entry<Integer, BattlefieldEntity> entry : _field.entrySet()) {
+				if (entry.getValue() instanceof Bot
+						&& ((Bot) entry.getValue()).getBotNumber() == moveResult.getBotNumber()) {
 					return entry.getKey();
 				}
 			}
@@ -263,7 +264,11 @@ public class Battlefield {
 		}
 
 		public Integer whoIsAtPosition(int position) {
-			return _field.get(position);
+			BattlefieldEntity entity = _field.get(position);
+			if (entity instanceof Bot) {
+				return ((Bot) entity).getBotNumber();
+			}
+			return null;
 		}
 
 		@Override
@@ -274,15 +279,14 @@ public class Battlefield {
 	}
 
 	public Integer getNumberOfMenStanding() {
-		List<Integer> menStanding = field.values().stream()
-				.filter(bot -> (bot != null && bot != Constants.MINE_REPRESENTATION)).collect(Collectors.toList());
+		List<BattlefieldEntity> menStanding = field.values().stream()
+				.filter(bot -> (bot != null && !(bot instanceof Mine))).collect(Collectors.toList());
 		return menStanding.size();
 	}
 
-	public Integer getWinner() {
-		List<Integer> menStanding = field.values().stream()
-				.filter(bot -> (bot != null && bot != Constants.MINE_REPRESENTATION)).collect(Collectors.toList());
-		Collections.sort(menStanding);
+	public Bot getWinner() {
+		List<Bot> menStanding = field.values().stream().filter(bot -> (bot != null && !(bot instanceof Mine)))
+				.map(entity -> Bot.class.cast(entity)).collect(Collectors.toList());
 		if (menStanding.size() != 1) {
 			// LOGGER.log(Level.FINE, "No winner. Men standing are: " +
 			// menStanding);
@@ -292,8 +296,8 @@ public class Battlefield {
 	}
 
 	public boolean isBotAlive(int bot) {
-		for(Integer field : this.field.values()) {
-			if(field != null && field.equals(bot)) {
+		for (BattlefieldEntity field : this.field.values()) {
+			if (field != null && field instanceof Bot && ((Bot) field).getBotNumber() == bot) {
 				return true;
 			}
 		}

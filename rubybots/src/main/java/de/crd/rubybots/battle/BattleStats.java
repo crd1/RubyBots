@@ -10,7 +10,7 @@ public class BattleStats {
 
 	private final long timestamp;
 	private final Battlefield battleField;
-	private final Integer winner;
+	private final Bot winner;
 	private final int rounds;
 	private final int numberOfBots;
 
@@ -49,7 +49,7 @@ public class BattleStats {
 		return true;
 	}
 
-	public Integer getWinner() {
+	public Bot getWinner() {
 		return winner;
 	}
 
@@ -107,7 +107,7 @@ public class BattleStats {
 		sb.append(getNumberOfBots());
 		sb.append(lineSeparator);
 		sb.append("Winner: ");
-		sb.append(getWinner() != null ? "Bot " + getWinner() + " (" + getWinnerName() + ")" : "Nobody");
+		sb.append(getWinner() != null ? "Bot " + getWinner().getBotNumber() + " (" + getWinnerName() + ")" : "Nobody");
 		sb.append(lineSeparator);
 		sb.append("Rounds: ");
 		sb.append(getRounds());
@@ -126,10 +126,10 @@ public class BattleStats {
 	}
 
 	private String getWinnerName() {
-		Integer winner = getWinner();
+		Bot winner = getWinner();
 		if (winner == null) {
 			return "N/A";
 		}
-		return battleField.getParentBattle().getBotConfigs().get(winner).getName();
+		return battleField.getParentBattle().getBots().get(winner.getBotNumber()).getBotConfig().getName();
 	}
 }
