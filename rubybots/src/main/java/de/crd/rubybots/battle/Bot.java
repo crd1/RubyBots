@@ -6,6 +6,7 @@ public class Bot implements BattlefieldEntity {
 
 	private final int botNumber;
 	private final BotConfig botConfig;
+	private volatile Object data;
 
 	public Bot(int botNumber, BotConfig botConfig) {
 		this.botNumber = botNumber;
@@ -45,6 +46,14 @@ public class Bot implements BattlefieldEntity {
 	@Override
 	public String toString() {
 		return "Bot [botNumber=" + botNumber + "]";
+	}
+
+	public void storeData(Object data) {
+		this.data = data;
+	}
+
+	public Object getStoredData() {
+		return this.data;
 	}
 
 }

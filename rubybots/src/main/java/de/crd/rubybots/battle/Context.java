@@ -8,12 +8,14 @@ import de.crd.rubybots.battle.Battlefield.BattlefieldView;
 public class Context {
 
 	private static final Logger LOGGER = Logger.getLogger(Context.class.getSimpleName());
+	private final Battle battle;
 	private final int botNumber;
 	private final int round; // note that this is counted from 1 onwards
 	private final BattlefieldView battlefield;
 	private final int numberOfBots;
 
-	public Context(int botNumber, int round, BattlefieldView battlefieldView, int numberOfBots) {
+	public Context(Battle battle, int botNumber, int round, BattlefieldView battlefieldView, int numberOfBots) {
+		this.battle = battle;
 		this.botNumber = botNumber;
 		this.round = round;
 		this.battlefield = battlefieldView;
@@ -30,6 +32,14 @@ public class Context {
 
 	public BattlefieldView getBattlefield() {
 		return battlefield;
+	}
+	
+	public void storeData(Object data) {
+		this.battle.getBot(botNumber).storeData(data);
+	}
+	
+	public Object getStoredData() {
+		return this.battle.getBot(botNumber).getStoredData();
 	}
 
 	public int getNumberOfBots() {

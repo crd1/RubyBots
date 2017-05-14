@@ -106,7 +106,7 @@ public class Battle {
 				LOGGER.log(Level.FINE, "Skipping bot " + currentBot + " since it has already been destroyed.");
 				continue;
 			}
-			Context context = new Context(currentBot, round, battlefield.toView(currentBot), getNumberOfBots());
+			Context context = new Context(this, currentBot, round, battlefield.toView(currentBot), getNumberOfBots());
 			try {
 				engine.callBot(context);// this changes the battlefieldView
 			} catch (ScriptException e) {
