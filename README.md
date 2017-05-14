@@ -21,7 +21,8 @@ Bots can use the RubyBot API. At execution time there will be an object `$contex
 + round // the current round
 + numberOfBots // the total number of bots competing
 + battlefield // An object representing the battlefield at the time the round started
-Additionally you can call storeData(data) and getStoredData() on this object to keep information from round to the other.
+
+Additionally you can call storeData(data) and getStoredData() on the `$context` object to keep information from round to the other.
 You can also call log(message) on this object. This is explicitly encouraged.
 
 On the Battlefield object (`$context.battlefield`) you can call:
