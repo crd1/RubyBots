@@ -126,9 +126,12 @@ public class Battlefield {
 		}
 		// move the bot
 		field.put(currentPosition, null);
-		if (field.get(nextFree) == null || field.get(nextFree) instanceof Mine) {
+		if (field.get(nextFree) == null) {
 			field.put(nextFree, parentBattle.getBot(botNumber));
 		} else {
+			if (!(field.get(nextFree) instanceof Mine)) {
+				throw new IllegalStateException("Field to move to was neither free nor a mine.");
+			}
 			LOGGER.log(Level.FINE, "Bot " + botNumber + " stepped on a mine.");
 			field.put(nextFree, null);
 		}
