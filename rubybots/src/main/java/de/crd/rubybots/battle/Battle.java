@@ -94,6 +94,10 @@ public class Battle {
 		LOGGER.log(Level.FINE, "--------------------------------------\nCalling all bots for round " + round);
 		List<MoveResult> moveResults = new ArrayList<>();
 		for (int currentBot = 0; currentBot < getNumberOfBots(); currentBot++) {
+			if (!battlefield.isBotAlive(currentBot)) {
+				LOGGER.log(Level.FINE, "Skipping bot " + currentBot + " since it has already been destroyed.");
+				continue;
+			}
 			Context context = new Context(currentBot, round, battlefield.toView(currentBot), getNumberOfBots());
 			try {
 				engine.callBot(context);// this changes the battlefieldView

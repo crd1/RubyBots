@@ -291,4 +291,13 @@ public class Battlefield {
 		return menStanding.get(0); // last man standing...
 	}
 
+	public boolean isBotAlive(int bot) {
+		for(Integer field : this.field.values()) {
+			if(field != null && field.equals(bot)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
