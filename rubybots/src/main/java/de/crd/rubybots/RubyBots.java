@@ -32,14 +32,16 @@ public class RubyBots {
 	static {
 		// honor the simple minds
 		DEFAULT_BOTS.add(new BotClasspathConfig("hunter.rb")); // the hunter...
-		DEFAULT_BOTS.add(new BotClasspathConfig("hunted.rb")); // ...and the hunted
+		DEFAULT_BOTS.add(new BotClasspathConfig("hunted.rb")); // ...and the
+																// hunted
 	}
 
 	public static void main(String[] args) throws IOException {
 		System.out.println(
 				"\n\n\n*************************\nRubyBots v0.1\nCreated by crd\n*************************\n\n");
 		setExceptionHandler();
-		List<BotConfig> botConfig = getBotsFromArgs(args);
+		List<String> processedArguments = processArguments(args);
+		List<BotConfig> botConfig = getBotsFromArgs(processedArguments);
 		RubyBots rubyBots = new RubyBots(getDefaultBattleStatsUpdateListener(), botConfig);
 		Battle battle = null;
 		if ((battle = rubyBots.startBattle(null)) == null) {
@@ -52,6 +54,23 @@ public class RubyBots {
 		}
 		printFinalStats(battle);
 		System.exit(0);
+	}
+
+	private static List<String> processArguments(String[] args) {
+		List<String> processedArgs = new ArrayList<>();
+		if (args == null || args.length == 0) {
+			return processedArgs;
+		}
+		processedArgs.add(args[0]);
+		for (int i = 1; i < args.length; i++) {
+			String arg = args[i];
+			if (".".equals(arg)) {
+				processedArgs.add(processedArgs.get(processedArgs.size() - 1));
+			} else {
+				processedArgs.add(args[i]);
+			}
+		}
+		return processedArgs;
 	}
 
 	private static BattleStatsUpdateListener getDefaultBattleStatsUpdateListener() {
@@ -106,15 +125,15 @@ public class RubyBots {
 		});
 	}
 
-	private static List<BotConfig> getBotsFromArgs(String[] args) {
-		if (args == null || args.length == 0) {
+	private static List<BotConfig> getBotsFromArgs(List<String> args) {
+		if (args == null || args.size() == 0) {
 			System.out.println("Using default bots.");
 			return DEFAULT_BOTS;
 		}
 		return getBotFileConfigs(args);
 	}
 
-	private static List<BotConfig> getBotFileConfigs(String[] args) {
+	private static List<BotConfig> getBotFileConfigs(List<String> args) {
 		List<BotConfig> botConfigs = new ArrayList<>();
 		for (String arg : args) {
 			File argFile = new File(arg);
