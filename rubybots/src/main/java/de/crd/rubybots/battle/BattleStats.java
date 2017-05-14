@@ -62,7 +62,6 @@ public class BattleStats {
 	}
 
 	public static BattleStats calculateStats(long startTime, int numberOfBots, Battlefield battlefield) {
-		// TODO further values??
 		return new BattleStats(startTime, numberOfBots, new Battlefield(battlefield));
 	}
 
