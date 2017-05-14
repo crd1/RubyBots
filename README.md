@@ -30,7 +30,7 @@ On the Battlefield object (`$context.battlefield`) you can call:
 + getMyPosition() // returns your bot's position *at the time the round started*
 + whoIsAtPosition(position) // returns the id of the bot that was at the given position when the round started or nil
 + mine(position) // places a mine at the specified position. If this field is taken no action will be performed. If a bot moves to a mined field it is destroyed.
-+ fire(position) // fires as the specified position. If there is a bot on this field it will be destroyed.
++ fire(position) // fires as the specified position. If there is a bot or mine on this field it will be destroyed.
 + move() // moves your bot one step forward
 
 ## Rules of the game
